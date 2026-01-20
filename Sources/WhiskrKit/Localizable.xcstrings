@@ -1,0 +1,258 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "accessibility_closeButton_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "accessibility_label_not_selected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not selected"
+          }
+        }
+      }
+    },
+    "accessibility_label_selected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected"
+          }
+        }
+      }
+    },
+    "accessibility_score_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score %lld "
+          }
+        }
+      }
+    },
+    "accessibility_symbol_rating_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ rating"
+          }
+        }
+      }
+    },
+    "accessibility_symbol_star_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Star %1$lld"
+          }
+        }
+      }
+    },
+    "accessibility_tap_to_select_symbol_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to select rating from %1lld to %2lld %@"
+          }
+        }
+      }
+    },
+    "accessibility_textField_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textfield for written feedback"
+          }
+        }
+      }
+    },
+    "accessibility_textField_maxCharacter_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum %lld characters"
+          }
+        }
+      }
+    },
+    "accessibility_x_out_of_y_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1lld out of %2lld"
+          }
+        }
+      }
+    },
+    "accessibility_x_out_of_y_symbol_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1lld out of %2lld %@"
+          }
+        }
+      }
+    },
+    "close_button_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "form_required_scaleRating_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please select a number between %1lld and%2lld."
+          }
+        }
+      }
+    },
+    "form_required_symbolRating_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please select between %1lld and %2lld %@  "
+          }
+        }
+      }
+    },
+    "form_required_textFeedback_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please provide feedback before submitting"
+          }
+        }
+      }
+    },
+    "form_required_thumbsRating_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please select thumbs up or thumbs down"
+          }
+        }
+      }
+    },
+    "give_feedback_button_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give feedback"
+          }
+        }
+      }
+    },
+    "How likely are you to recommend us?" : {
+
+    },
+    "no_thanks_button_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, thanks"
+          }
+        }
+      }
+    },
+    "Quick feedback" : {
+
+    },
+    "rating_button_thumbsDown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbs down"
+          }
+        }
+      }
+    },
+    "rating.button.thumbsUp" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbs up"
+          }
+        }
+      }
+    },
+    "required_field_label" : {
+      "comment" : "Capitalize in context",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "required"
+          }
+        }
+      }
+    },
+    "submit_button_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Submit"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
