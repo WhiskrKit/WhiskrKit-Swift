@@ -17,8 +17,7 @@ struct PendingSubmissionTests {
     @Test("Pending submission initializes with correct defaults")
     func initializationDefaults() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let submission = PendingSubmission(surveyId: "test-survey", response: response)
@@ -34,8 +33,7 @@ struct PendingSubmissionTests {
     @Test("Pending submission generates unique IDs")
     func generatesUniqueIds() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let submission1 = PendingSubmission(surveyId: "test", response: response)
@@ -50,8 +48,7 @@ struct PendingSubmissionTests {
     @Test("Pending submission is not expired within expiration period")
     func notExpiredWithinPeriod() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let submission = PendingSubmission(
@@ -68,8 +65,7 @@ struct PendingSubmissionTests {
     @Test("Submission should retry when under max retries and not expired")
     func shouldRetryWhenValid() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         var submission = PendingSubmission(surveyId: "test", response: response)
@@ -85,8 +81,7 @@ struct PendingSubmissionTests {
     @Test("Submission should not retry when max retries exceeded")
     func shouldNotRetryWhenMaxRetriesExceeded() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         var submission = PendingSubmission(surveyId: "test", response: response)
@@ -102,8 +97,7 @@ struct PendingSubmissionTests {
     @Test("Can retry now returns true for first attempt")
     func canRetryNowForFirstAttempt() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let submission = PendingSubmission(surveyId: "test", response: response)
@@ -115,8 +109,7 @@ struct PendingSubmissionTests {
     @Test("Can retry now respects throttle period")
     func canRetryNowRespectsThrottle() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         var submission = PendingSubmission(surveyId: "test", response: response)
@@ -129,8 +122,7 @@ struct PendingSubmissionTests {
     @Test("Increment retry count updates fields correctly")
     func incrementRetryCountUpdatesFields() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         var submission = PendingSubmission(surveyId: "test", response: response)
@@ -150,8 +142,7 @@ struct PendingSubmissionTests {
     @Test("Pending submission encodes and decodes correctly")
     func encodesAndDecodesCorrectly() throws {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let original = PendingSubmission(surveyId: "test-survey", response: response)
@@ -174,12 +165,10 @@ struct PendingSubmissionTests {
     @Test("Pending submissions with same ID are equal")
     func equalityBasedOnId() {
         let response1 = SurveyResponse(
-            surveyIdentifier: "test1",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         let response2 = SurveyResponse(
-            surveyIdentifier: "test2",
-            results: ["q1": .symbolRating(score: 3)]
+            results: ["q1": .symbolRating(3)]
         )
         
         let submission1 = PendingSubmission(surveyId: "test", response: response1)

@@ -96,8 +96,7 @@ struct SubmissionRetryCoordinatorTests {
         // Create a submission that's already at maxRetries - 1
         // Use the DEBUG initializer to avoid throttling issues
         let response = SurveyResponse(
-            surveyIdentifier: "test-1",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         let submission = PendingSubmission(
             surveyId: "test-1",
@@ -177,8 +176,7 @@ struct SubmissionRetryCoordinatorTests {
 
 private func createTestSubmission(surveyId: String) -> PendingSubmission {
     let response = SurveyResponse(
-        surveyIdentifier: surveyId,
-        results: ["q1": .symbolRating(score: 5)]
+        results: ["q1": .symbolRating(5)]
     )
     return PendingSubmission(surveyId: surveyId, response: response)
 }

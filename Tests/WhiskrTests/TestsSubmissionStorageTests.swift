@@ -164,8 +164,7 @@ struct SubmissionStorageTests {
 
 private func createTestSubmission(surveyId: String) -> PendingSubmission {
     let response = SurveyResponse(
-        surveyIdentifier: surveyId,
-        results: ["q1": .symbolRating(score: 5)]
+        results: ["q1": .symbolRating(5)]
     )
     return PendingSubmission(surveyId: surveyId, response: response)
 }

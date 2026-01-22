@@ -17,23 +17,20 @@ struct SurveyResponseTests {
     @Test("Survey response initializes correctly")
     func initializesCorrectly() {
         let response = SurveyResponse(
-            surveyIdentifier: "test-survey",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
-        
-        #expect(response.surveyIdentifier == "test-survey")
+
         #expect(response.results.count == 1)
     }
     
     @Test("Survey response supports multiple result types")
     func supportsMultipleResultTypes() {
         let response = SurveyResponse(
-            surveyIdentifier: "test",
             results: [
-                "q1": .symbolRating(score: 5),
-                "q2": .nspRating(score: 8),
-				"q3": .thumbsRating(thumbsRating: .thumbsUp),
-                "q4": .textualSurvey(feedback: "Great app!")
+                "q1": .symbolRating(5),
+				"q2": .npsRating(8),
+				"q3": .thumbsRating(.thumbsUp),
+                "q4": .textualSurvey("Great app!")
             ]
         )
         
@@ -46,7 +43,7 @@ struct SurveyResponseTests {
             Issue.record("Expected symbolRating")
         }
         
-        if case .nspRating(let score) = response.results["q2"] {
+		if case .npsRating(let score) = response.results["q2"] {
             #expect(score == 8)
         } else {
             Issue.record("Expected nspRating")
@@ -70,8 +67,7 @@ struct SurveyResponseTests {
     @Test("Survey response encodes to JSON correctly")
     func encodesToJSON() throws {
         let response = SurveyResponse(
-            surveyIdentifier: "test-survey",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let encoder = JSONEncoder()
@@ -81,7 +77,6 @@ struct SurveyResponseTests {
         
         // Verify JSON structure
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        #expect(json?["surveyIdentifier"] as? String == "test-survey")
         #expect(json?["results"] != nil)
     }
     
@@ -89,12 +84,9 @@ struct SurveyResponseTests {
     func decodesFromJSON() throws {
         let jsonString = """
         {
-            "surveyIdentifier": "test-survey",
             "results": {
                 "q1": {
-                    "symbolRating": {
-                        "score": 5
-                    }
+                    "symbolRating": 5
                 }
             }
         }
@@ -103,8 +95,7 @@ struct SurveyResponseTests {
         let data = jsonString.data(using: .utf8)!
         let decoder = JSONDecoder()
         let response = try decoder.decode(SurveyResponse.self, from: data)
-        
-        #expect(response.surveyIdentifier == "test-survey")
+
         #expect(response.results.count == 1)
         
         if case .symbolRating(let score) = response.results["q1"] {
@@ -117,12 +108,11 @@ struct SurveyResponseTests {
     @Test("Survey response round-trips through encoding and decoding")
     func roundTripEncodingDecoding() throws {
         let original = SurveyResponse(
-            surveyIdentifier: "test-survey",
             results: [
-                "q1": .symbolRating(score: 5),
-                "q2": .nspRating(score: 9),
-				"q3": .thumbsRating(thumbsRating: .thumbsDown),
-                "q4": .textualSurvey(feedback: "Nice!")
+                "q1": .symbolRating(5),
+                "q2": .npsRating(9),
+				"q3": .thumbsRating(.thumbsDown),
+                "q4": .textualSurvey("Nice!")
             ]
         )
         
@@ -140,43 +130,25 @@ struct SurveyResponseTests {
     @Test("Survey responses with same data are equal")
     func equalityWithSameData() {
         let response1 = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let response2 = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         #expect(response1 == response2)
     }
-    
-    @Test("Survey responses with different identifiers are not equal")
-    func inequalityWithDifferentIdentifiers() {
-        let response1 = SurveyResponse(
-            surveyIdentifier: "test1",
-            results: ["q1": .symbolRating(score: 5)]
-        )
-        
-        let response2 = SurveyResponse(
-            surveyIdentifier: "test2",
-            results: ["q1": .symbolRating(score: 5)]
-        )
-        
-        #expect(response1 != response2)
-    }
+
     
     @Test("Survey responses with different results are not equal")
     func inequalityWithDifferentResults() {
         let response1 = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         let response2 = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 3)]
+            results: ["q1": .symbolRating(3)]
         )
         
         #expect(response1 != response2)
@@ -186,9 +158,9 @@ struct SurveyResponseTests {
     
     @Test("Survey types are equatable")
     func surveyTypesAreEquatable() {
-        let type1: SurveyResponse.SurveyType = .symbolRating(score: 5)
-        let type2: SurveyResponse.SurveyType = .symbolRating(score: 5)
-        let type3: SurveyResponse.SurveyType = .symbolRating(score: 3)
+        let type1: SurveyResponse.SurveyType = .symbolRating(5)
+        let type2: SurveyResponse.SurveyType = .symbolRating(5)
+        let type3: SurveyResponse.SurveyType = .symbolRating(3)
         
         #expect(type1 == type2)
         #expect(type1 != type3)

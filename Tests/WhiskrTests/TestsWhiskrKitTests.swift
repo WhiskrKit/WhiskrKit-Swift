@@ -17,10 +17,10 @@ struct WhiskrKitCoreTests {
     @Test("WhiskrKit initializes with API key")
     func initializeWithAPIKey() {
         let whiskrKit = WhiskrKit.shared
-        whiskrKit.initialize(apiKey: "test-api-key")
-        
-        // Should not crash and should be ready to use
-        // We'll verify through fetch attempts
+		whiskrKit.initialize(
+			apiKey: "test-api-key",
+			withMockedSurveys: true
+		)
     }
     
     @Test("WhiskrKit sets theme correctly")
@@ -50,14 +50,12 @@ struct WhiskrKitCoreTests {
     @Test("WhiskrKit submits survey response after initialization")
 	func submitSurveyResponseAfterInitialization() async {
         let whiskrKit = WhiskrKit.shared
-        whiskrKit.initialize(apiKey: "test-key")
-        
+		whiskrKit.initialize(apiKey: "test-key",withMockedSurveys: true)
+
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
-        
-        // Should complete without crashing
+
         await whiskrKit.submitSurveyResponse(surveyId: "test", response: response)
     }
 }
@@ -79,8 +77,6 @@ struct ConfigurationServiceTests {
         )
         
         service.configure(apiKey: "test-key")
-        
-        // Configuration should complete successfully
     }
     
     @Test("Configuration service submits response successfully")
@@ -96,8 +92,7 @@ struct ConfigurationServiceTests {
         service.configure(apiKey: "test-key")
         
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         await service.submitSurveyResponse(surveyId: "test", response: response)
@@ -121,8 +116,7 @@ struct ConfigurationServiceTests {
         service.configure(apiKey: "test-key")
         
         let response = SurveyResponse(
-            surveyIdentifier: "test",
-            results: ["q1": .symbolRating(score: 5)]
+            results: ["q1": .symbolRating(5)]
         )
         
         await service.submitSurveyResponse(surveyId: "test", response: response)
@@ -164,8 +158,7 @@ struct ConfigurationServiceTests {
 
 private func createTestSubmission(surveyId: String) -> PendingSubmission {
     let response = SurveyResponse(
-        surveyIdentifier: surveyId,
-        results: ["q1": .symbolRating(score: 5)]
+        results: ["q1": .symbolRating(5)]
     )
     return PendingSubmission(surveyId: surveyId, response: response)
 }
