@@ -35,19 +35,21 @@ public struct WhiskrKitTheme: Sendable {
         self.body = body
     }
     
-    public struct ButtonTheme: Sendable {
-        var primary: ButtonVariant
-        var secondary: ButtonVariant
-        
-        public init(
-            primary: ButtonVariant,
-            secondary: ButtonVariant,
-        ) {
-            self.primary = primary
-            self.secondary = secondary
-        }
-    }
-    
+	public struct ButtonTheme: Sendable {
+		var primary: ButtonAppearance
+		var secondary: ButtonAppearance
+
+		public init(primary: ButtonAppearance, secondary: ButtonAppearance) {
+			self.primary = primary
+			self.secondary = secondary
+		}
+
+		public enum ButtonAppearance: Sendable {
+			case variant(ButtonVariant)
+			case custom(AnyButtonStyle)
+		}
+	}
+
     public struct TextTheme: Sendable {
         var font: Font
         var color: Color
@@ -138,8 +140,8 @@ extension WhiskrKitTheme {
             )
         ),
         button: .init(
-            primary: .init(backgroundColor: Color(.label), textColor: Color(.systemBackground), font: .body.weight(.medium), cornerRadius: 10, size: .compact),
-			secondary: .init(backgroundColor: .clear, textColor: Color(.label), font: .body, cornerRadius: 8)
+			primary: .variant(.init(backgroundColor: Color(.label), textColor: Color(.systemBackground), font: .body.weight(.medium), cornerRadius: 10, size: .compact)),
+			secondary: .variant(.init(backgroundColor: .clear, textColor: Color(.label), font: .body, cornerRadius: 8))
 		),
         title: .init(font: .title2.weight(.bold), color: .primary),
         subtitle: .init(font: .headline.weight(.semibold), color: .secondary),
@@ -147,6 +149,12 @@ extension WhiskrKitTheme {
         subheadline: .init(font: .subheadline, color: .secondary),
         body: .init(font: .body, color: .primary)
     )
+}
+
+public extension WhiskrKitTheme.ButtonTheme.ButtonAppearance {
+	static func style<S: ButtonStyle>(_ style: S) -> Self {
+		.custom(AnyButtonStyle(style))
+	}
 }
 
 enum WhiskrKitButtonVariant {
@@ -157,34 +165,37 @@ public enum ButtonSize {
 }
 
 struct WhiskrKitButtonStyle: ButtonStyle {
-    @Environment(\.WhiskrKitTheme) private var whiskrKitTheme
-    var variant: WhiskrKitButtonVariant
-    var isCompact: Bool = false
-    
-    func makeBody(configuration: Configuration) -> some View {
-        let theme: WhiskrKitTheme.ButtonVariant = {
-            switch variant {
-            case .primary: whiskrKitTheme.button.primary
-            case .secondary: whiskrKitTheme.button.secondary
-            }
-        }()
-        
-        configuration.label
-            .padding(.all, isCompact ? 10 : nil)
-            .font(theme.font)
-            .background(theme.backgroundColor)
-            .foregroundStyle(theme.textColor)
-            .background(
-                RoundedRectangle(cornerRadius: theme.cornerRadius)
-                    .stroke(theme.borderColor ?? .clear,
-                            lineWidth: (theme.borderColor != nil) ? 2 : 0)
-            )
-            .clipShape(
-                RoundedRectangle(cornerRadius: theme.cornerRadius)
-            )
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
-    }
-    
+	@Environment(\.WhiskrKitTheme) private var whiskrKitTheme
+	var variant: WhiskrKitButtonVariant
+	var isCompact: Bool = false
+
+	func makeBody(configuration: Configuration) -> some View {
+		let appearance: WhiskrKitTheme.ButtonTheme.ButtonAppearance = {
+			switch variant {
+			case .primary: whiskrKitTheme.button.primary
+			case .secondary: whiskrKitTheme.button.secondary
+			}
+		}()
+
+		switch appearance {
+		case .variant(let theme):
+			configuration.label
+				.padding(.all, isCompact ? 10 : nil)
+				.font(theme.font)
+				.background(theme.backgroundColor)
+				.foregroundStyle(theme.textColor)
+				.background(
+					RoundedRectangle(cornerRadius: theme.cornerRadius)
+						.stroke(theme.borderColor ?? .clear,
+								lineWidth: (theme.borderColor != nil) ? 2 : 0)
+				)
+				.clipShape(RoundedRectangle(cornerRadius: theme.cornerRadius))
+				.opacity(configuration.isPressed ? 0.8 : 1.0)
+
+		case .custom(let customStyle):
+			customStyle.makeBody(configuration: configuration)
+		}
+	}
 }
 
 struct WhiskrKitSheetContainerStyle: ViewModifier {
@@ -315,6 +326,17 @@ public extension EnvironmentValues {
     }
 }
 
+public struct AnyButtonStyle: ButtonStyle, @unchecked Sendable {
+	private let _makeBody: (ButtonStyle.Configuration) -> AnyView
+
+	public init<S: ButtonStyle>(_ style: S) {
+		_makeBody = { AnyView(style.makeBody(configuration: $0)) }
+	}
+
+	public func makeBody(configuration: Configuration) -> some View {
+		_makeBody(configuration)
+	}
+}
 
 #Preview {
 	ScrollView {
