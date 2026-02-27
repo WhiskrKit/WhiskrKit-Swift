@@ -9,8 +9,8 @@
 import OSLog
 
 extension Logger {
-    static let wkUI = Logger(subsystem: "com.WhiskrKit.iosFramework", category: "UI")
-    static let wkCore = Logger(subsystem: "com.WhiskrKit.iosFramework", category: "Core")
-    static let wkNetworking = Logger(subsystem: "com.WhiskrKit.iosFramework", category: "Networking")
-    static let wkCache = Logger(subsystem: "com.WhiskrKit.iosFramework", category: "Cache")
+    static let wkUI = Logger(subsystem: "eu.WhiskrKit.iosFramework", category: "UI")
+    static let wkCore = Logger(subsystem: "eu.WhiskrKit.iosFramework", category: "Core")
+    static let wkNetworking = Logger(subsystem: "eu.WhiskrKit.iosFramework", category: "Networking")
+    static let wkCache = Logger(subsystem: "eu.WhiskrKit.iosFramework", category: "Cache")
 }

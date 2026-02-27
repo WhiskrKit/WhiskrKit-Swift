@@ -31,7 +31,7 @@ struct WhiskrKitSurveyModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .task {
-                await fetchSurvey(for: identifier)
+                await checkEligibilityAndPresent(for: identifier)
             }
             .toast(
                 isPresented: $presentsToast,
@@ -75,20 +75,30 @@ struct WhiskrKitSurveyModifier: ViewModifier {
         FullScreenContainerView(template: template)
     }
 
+    private func checkEligibilityAndPresent(for identifier: String) async {
+        let eligibleTemplate: SurveyTemplate? = await WhiskrKit.shared.checkEligibility(for: identifier)
+        guard let eligibleTemplate else { return }
+        await present(eligibleTemplate)
+    }
+
     private func fetchSurvey(for identifier: String) async {
 		let fetchedTemplate: SurveyTemplate? = await WhiskrKit.shared.fetchSurveyTemplate(for: identifier)
 		guard let fetchedTemplate else { return }
-		await MainActor.run {
-			self.template = fetchedTemplate
-			switch fetchedTemplate.presentationBase {
-			case .fullScreenForm:
-				presentsFullScreen = true
-			case .sheet:
-				presentsModal = true
-			case .toast:
-				presentsToast = true
-			}
-		}
+		await present(fetchedTemplate)
+    }
+
+    private func present(_ surveyTemplate: SurveyTemplate) async {
+        await MainActor.run {
+            self.template = surveyTemplate
+            switch surveyTemplate.presentationBase {
+            case .fullScreenForm:
+                presentsFullScreen = true
+            case .sheet:
+                presentsModal = true
+            case .toast:
+                presentsToast = true
+            }
+        }
     }
 }
 

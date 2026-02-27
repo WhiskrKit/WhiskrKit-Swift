@@ -22,5 +22,5 @@ enum SubmissionQueueConfig {
     static let expirationDays = 7
     
     /// UserDefaults key for persistence
-    static let storageKey = "com.WhiskrKit.pendingSubmissions"
+    static let storageKey = "eu.WhiskrKit.pendingSubmissions"
 }

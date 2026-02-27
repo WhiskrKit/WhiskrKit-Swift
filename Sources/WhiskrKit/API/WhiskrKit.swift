@@ -16,6 +16,9 @@ public class WhiskrKit {
     var theme: WhiskrKitTheme?
     private var configurationService: ConfigurationService
 
+    private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
+    private var eligibilityService: EligibilityService?
+
     private init() {
 		configurationService = WhiskrKitConfigurationService()
     }
@@ -35,6 +38,14 @@ public class WhiskrKit {
 			configurationService = MockConfigurationService()
 		}
         configurationService.configure(apiKey: apiKey)
+
+        // Eligibility context tracking
+        eligibilityStorage.initializeIfNeeded()
+        eligibilityStorage.incrementSessionCount()
+        eligibilityService = EligibilityService(
+            networkService: configurationService.networkService,
+            storage: eligibilityStorage
+        )
     }
 
 
@@ -70,6 +81,14 @@ public class WhiskrKit {
 	public func setTheme(_ theme: WhiskrKitTheme) {
 		self.theme = theme
 	}
+    internal func checkEligibility(for surveyId: String) async -> SurveyTemplate? {
+        guard apiKey != nil else {
+            Logger.wkCore.critical("WhiskrKit is not initialized with an API key. Call initialize(apiKey:) first.")
+            return nil
+        }
+        return await eligibilityService?.checkEligibility(for: surveyId)
+    }
+
     internal func fetchSurveyTemplate<T>(for identifier: String) async -> T? where T: Decodable {
         guard apiKey != nil else {
             Logger.wkCore.critical("WhiskrKit is not initialized with with an API key. Call initialize(apiKey:) first.")
