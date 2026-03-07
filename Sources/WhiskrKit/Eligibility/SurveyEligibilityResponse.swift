@@ -12,4 +12,5 @@ struct SurveyEligibilityResponse: Decodable {
     let shouldShow: Bool
     let survey: SurveyTemplate?
     let nextCheckAfter: Date?
+    let removeFromHistory: Bool?
 }

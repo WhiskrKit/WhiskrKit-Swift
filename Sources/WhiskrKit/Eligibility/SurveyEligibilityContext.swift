@@ -15,4 +15,5 @@ struct SurveyEligibilityContext: Codable {
     let sessionCount: Int
     let installDate: Date
     let lastSurveyDate: Date?
+    let completedSurveys: [String: Date]
 }

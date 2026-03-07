@@ -14,8 +14,10 @@ protocol EligibilityStorage: AnyObject {
     var sessionCount: Int { get }
     var installDate: Date { get }
     var lastSurveyDate: Date? { get set }
+    var completedSurveys: [String: Date] { get set }
     func nextCheckAfter(for surveyId: String) -> Date?
     func setNextCheckAfter(_ date: Date?, for surveyId: String)
+    func removeCompletedSurvey(_ surveyId: String)
     func incrementSessionCount()
     /// Sets deviceId and installDate on first call; subsequent calls are no-ops.
     func initializeIfNeeded()
@@ -29,6 +31,7 @@ final class UserDefaultsEligibilityStorage: EligibilityStorage {
         static let sessionCount = "eu.WhiskrKit.sessionCount"
         static let installDate = "eu.WhiskrKit.installDate"
         static let lastSurveyDate = "eu.WhiskrKit.lastSurveyDate"
+        static let completedSurveys = "eu.WhiskrKit.completedSurveys"
         static func nextCheckAfter(for surveyId: String) -> String {
             "eu.WhiskrKit.nextCheckAfter.\(surveyId)"
         }
@@ -53,6 +56,28 @@ final class UserDefaultsEligibilityStorage: EligibilityStorage {
     var lastSurveyDate: Date? {
         get { userDefaults.object(forKey: Keys.lastSurveyDate) as? Date }
         set { userDefaults.set(newValue, forKey: Keys.lastSurveyDate) }
+    }
+
+    var completedSurveys: [String: Date] {
+        get {
+            guard let data = userDefaults.data(forKey: Keys.completedSurveys) else { return [:] }
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return (try? decoder.decode([String: Date].self, from: data)) ?? [:]
+        }
+        set {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            if let data = try? encoder.encode(newValue) {
+                userDefaults.set(data, forKey: Keys.completedSurveys)
+            }
+        }
+    }
+
+    func removeCompletedSurvey(_ surveyId: String) {
+        var completed = completedSurveys
+        completed.removeValue(forKey: surveyId)
+        completedSurveys = completed
     }
 
     func nextCheckAfter(for surveyId: String) -> Date? {

@@ -60,6 +60,12 @@ final class EligibilityService {
             // 6. Persist nextCheckAfter hint
             storage.setNextCheckAfter(response.nextCheckAfter, for: surveyId)
 
+            // 6b. Handle removeFromHistory
+            if response.removeFromHistory == true {
+                storage.removeCompletedSurvey(surveyId)
+                storage.setNextCheckAfter(nil, for: surveyId)
+            }
+
             // 7. Present if eligible
             if response.shouldShow, let survey = response.survey {
                 storage.lastSurveyDate = Date()
@@ -85,7 +91,8 @@ final class EligibilityService {
             locale: Locale.current.identifier,
             sessionCount: storage.sessionCount,
             installDate: storage.installDate,
-            lastSurveyDate: storage.lastSurveyDate
+            lastSurveyDate: storage.lastSurveyDate,
+            completedSurveys: storage.completedSurveys
         )
     }
 }

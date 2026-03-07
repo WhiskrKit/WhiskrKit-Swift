@@ -103,6 +103,17 @@ public class WhiskrKit {
             return
         }
 
-        await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
+        let success = await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
+        if success {
+            trackSurveyCompletion(surveyId: surveyId)
+        }
+    }
+
+    private func trackSurveyCompletion(surveyId: String) {
+        var completed = eligibilityStorage.completedSurveys
+        completed[surveyId] = Date()
+        eligibilityStorage.completedSurveys = completed
+        eligibilityStorage.setNextCheckAfter(nil, for: surveyId)
+        Logger.wkCore.info("📋 Tracked completion for survey '\(surveyId)'")
     }
 }

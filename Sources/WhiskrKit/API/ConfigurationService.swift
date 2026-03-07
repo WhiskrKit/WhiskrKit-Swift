@@ -12,7 +12,8 @@ import OSLog
 protocol ConfigurationService {
     var networkService: NetworkService { get }
     func fetchSurveyTemplate<T>(for identifier: String) async throws -> T? where T: Decodable
-    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async
+    @discardableResult
+    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async -> Bool
     func retryPendingSubmissions() async
     func configure(apiKey: String)
 }
@@ -25,7 +26,8 @@ final class WhiskrKitConfigurationService: ConfigurationService {
 
     init(
         networkService: NetworkService = NetworkService(
-            baseURL: URL(string: "http://localhost:8080")!
+			baseURL: URL(string: "http://localhost:8080")!
+//            baseURL: URL(string: "https://app.whiskrkit.eu")!
         ),
         submissionQueue: SubmissionQueue = SubmissionQueue()
     ) {
@@ -58,7 +60,8 @@ final class WhiskrKitConfigurationService: ConfigurationService {
 		}
     }
 
-    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async {
+    @discardableResult
+    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async -> Bool {
         await retryPendingSubmissions()
         do {
             try await networkService.submitRating(
@@ -67,6 +70,7 @@ final class WhiskrKitConfigurationService: ConfigurationService {
                 surveyResponse: response
             )
             Logger.wkNetworking.info("✅ Survey response submitted successfully")
+            return true
         } catch {
             Logger.wkNetworking.warning("❌ Submission failed, adding to queue: \(error)")
 
@@ -76,6 +80,7 @@ final class WhiskrKitConfigurationService: ConfigurationService {
             )
 
             submissionQueue.enqueue(pending)
+            return false
         }
     }
 }

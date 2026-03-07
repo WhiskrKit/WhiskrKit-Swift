@@ -17,6 +17,7 @@ final class MockEligibilityStorage: EligibilityStorage {
     var _sessionCount: Int
     var _installDate: Date
     var lastSurveyDate: Date?
+    var completedSurveys: [String: Date] = [:]
     private var _nextCheckAfter: [String: Date] = [:]
 
     var initializeCallCount = 0
@@ -42,6 +43,10 @@ final class MockEligibilityStorage: EligibilityStorage {
 
     func setNextCheckAfter(_ date: Date?, for surveyId: String) {
         _nextCheckAfter[surveyId] = date
+    }
+
+    func removeCompletedSurvey(_ surveyId: String) {
+        completedSurveys.removeValue(forKey: surveyId)
     }
 
     func incrementSessionCount() {
@@ -246,7 +251,7 @@ struct EligibilityServiceTests {
         let past = Date().addingTimeInterval(-3600)
         storage.setNextCheckAfter(past, for: "checkout-feedback")
 
-        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil)
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
 
         _ = await sut.checkEligibility(for: "checkout-feedback")
@@ -259,7 +264,7 @@ struct EligibilityServiceTests {
         let (sut, network, storage) = makeSUT()
         let template = makeToastSurveyTemplate()
         let future = Date().addingTimeInterval(86400)
-        let response = SurveyEligibilityResponse(shouldShow: true, survey: template, nextCheckAfter: future)
+        let response = SurveyEligibilityResponse(shouldShow: true, survey: template, nextCheckAfter: future, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
 
         let result = await sut.checkEligibility(for: "checkout-feedback")
@@ -271,7 +276,7 @@ struct EligibilityServiceTests {
     @Test("When server returns shouldShow false, nil is returned and lastSurveyDate is NOT updated")
     func returnsNilWhenShouldShowIsFalse() async {
         let (sut, network, storage) = makeSUT()
-        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil)
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
 
         let result = await sut.checkEligibility(for: "checkout-feedback")
@@ -284,7 +289,7 @@ struct EligibilityServiceTests {
     func persistsNextCheckAfterFromResponse() async {
         let (sut, network, storage) = makeSUT()
         let nextCheck = Date().addingTimeInterval(7200)
-        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nextCheck)
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nextCheck, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
 
         _ = await sut.checkEligibility(for: "checkout-feedback")
@@ -311,7 +316,7 @@ struct EligibilityServiceTests {
         // Add a delay so the second task can observe the first as in-flight at the await point
         network.delayNanoseconds = 100_000_000 // 100 ms
         let template = makeToastSurveyTemplate()
-        let response = SurveyEligibilityResponse(shouldShow: true, survey: template, nextCheckAfter: nil)
+        let response = SurveyEligibilityResponse(shouldShow: true, survey: template, nextCheckAfter: nil, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
 
         // Both tasks run on @MainActor and interleave at the await point inside checkEligibility.
@@ -340,7 +345,8 @@ struct SurveyEligibilityContextTests {
             locale: "en-US",
             sessionCount: 3,
             installDate: installDate,
-            lastSurveyDate: nil
+            lastSurveyDate: nil,
+            completedSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -354,6 +360,7 @@ struct SurveyEligibilityContextTests {
         #expect(json["sessionCount"] as? Int == 3)
         #expect(json["installDate"] as? String != nil)
         #expect(json["lastSurveyDate"] == nil)
+        #expect(json["completedSurveys"] as? [String: String] == [:])
     }
 
     @Test("SurveyEligibilityContext encodes lastSurveyDate when present")
@@ -364,7 +371,8 @@ struct SurveyEligibilityContextTests {
             locale: "nl-NL",
             sessionCount: 1,
             installDate: Date(),
-            lastSurveyDate: Date(timeIntervalSince1970: 1_710_000_000)
+            lastSurveyDate: Date(timeIntervalSince1970: 1_710_000_000),
+            completedSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -383,7 +391,8 @@ struct SurveyEligibilityContextTests {
             locale: "de-DE",
             sessionCount: 7,
             installDate: Date(timeIntervalSince1970: 1_700_000_000),
-            lastSurveyDate: Date(timeIntervalSince1970: 1_705_000_000)
+            lastSurveyDate: Date(timeIntervalSince1970: 1_705_000_000),
+            completedSurveys: ["checkout-feedback": Date(timeIntervalSince1970: 1_704_000_000)]
         )
 
         let encoder = JSONEncoder()
@@ -400,6 +409,8 @@ struct SurveyEligibilityContextTests {
         #expect(decoded.sessionCount == original.sessionCount)
         #expect(abs(decoded.installDate.timeIntervalSince(original.installDate)) < 1)
         #expect(abs(decoded.lastSurveyDate!.timeIntervalSince(original.lastSurveyDate!)) < 1)
+        #expect(decoded.completedSurveys.count == 1)
+        #expect(abs(decoded.completedSurveys["checkout-feedback"]!.timeIntervalSince(original.completedSurveys["checkout-feedback"]!)) < 1)
     }
 }
 
@@ -433,5 +444,301 @@ struct SurveyEligibilityResponseTests {
 
         #expect(response.shouldShow == false)
         #expect(response.nextCheckAfter != nil)
+    }
+
+    @Test("Decodes response with removeFromHistory true")
+    func decodesRemoveFromHistoryTrue() throws {
+        let json = """
+        { "shouldShow": false, "survey": null, "nextCheckAfter": null, "removeFromHistory": true }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let response = try decoder.decode(SurveyEligibilityResponse.self, from: Data(json.utf8))
+
+        #expect(response.removeFromHistory == true)
+    }
+
+    @Test("Decodes response without removeFromHistory field (backward compatible)")
+    func decodesWithoutRemoveFromHistory() throws {
+        let json = """
+        { "shouldShow": true, "survey": null, "nextCheckAfter": null }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let response = try decoder.decode(SurveyEligibilityResponse.self, from: Data(json.utf8))
+
+        #expect(response.removeFromHistory == nil)
+    }
+}
+
+// MARK: - Completed Surveys Storage Tests
+
+@Suite("Completed Surveys Storage Tests")
+struct CompletedSurveysStorageTests {
+
+    private func makeFreshUserDefaults() -> UserDefaults {
+        let suiteName = "eu.WhiskrKitTests.\(UUID().uuidString)"
+        return UserDefaults(suiteName: suiteName)!
+    }
+
+    @Test("completedSurveys is empty initially")
+    func completedSurveysEmptyInitially() {
+        let storage = UserDefaultsEligibilityStorage(userDefaults: makeFreshUserDefaults())
+        #expect(storage.completedSurveys.isEmpty)
+    }
+
+    @Test("Adding a completed survey persists correctly")
+    func addCompletedSurveyPersists() {
+        let storage = UserDefaultsEligibilityStorage(userDefaults: makeFreshUserDefaults())
+        let now = Date()
+        var completed = storage.completedSurveys
+        completed["checkout-feedback"] = now
+        storage.completedSurveys = completed
+
+        let retrieved = storage.completedSurveys
+        #expect(retrieved.count == 1)
+        #expect(retrieved["checkout-feedback"] != nil)
+        #expect(abs(retrieved["checkout-feedback"]!.timeIntervalSince(now)) < 1)
+    }
+
+    @Test("Re-submitting the same survey updates the date without creating a duplicate")
+    func resubmitUpdatesDate() {
+        let storage = UserDefaultsEligibilityStorage(userDefaults: makeFreshUserDefaults())
+        let earlier = Date(timeIntervalSince1970: 1_700_000_000)
+        let later = Date(timeIntervalSince1970: 1_710_000_000)
+
+        var completed = storage.completedSurveys
+        completed["checkout-feedback"] = earlier
+        storage.completedSurveys = completed
+
+        completed = storage.completedSurveys
+        completed["checkout-feedback"] = later
+        storage.completedSurveys = completed
+
+        let retrieved = storage.completedSurveys
+        #expect(retrieved.count == 1)
+        #expect(abs(retrieved["checkout-feedback"]!.timeIntervalSince(later)) < 1)
+    }
+
+    @Test("removeCompletedSurvey removes the survey from the dictionary")
+    func removeCompletedSurveyRemovesEntry() {
+        let storage = UserDefaultsEligibilityStorage(userDefaults: makeFreshUserDefaults())
+        var completed = storage.completedSurveys
+        completed["checkout-feedback"] = Date()
+        completed["onboarding-nps"] = Date()
+        storage.completedSurveys = completed
+
+        storage.removeCompletedSurvey("checkout-feedback")
+
+        let retrieved = storage.completedSurveys
+        #expect(retrieved.count == 1)
+        #expect(retrieved["checkout-feedback"] == nil)
+        #expect(retrieved["onboarding-nps"] != nil)
+    }
+
+    @Test("removeCompletedSurvey for non-existent surveyId does not crash")
+    func removeNonExistentSurveyIsSafe() {
+        let storage = UserDefaultsEligibilityStorage(userDefaults: makeFreshUserDefaults())
+        storage.removeCompletedSurvey("does-not-exist")
+        #expect(storage.completedSurveys.isEmpty)
+    }
+
+    @Test("completedSurveys dates are stored in ISO 8601 format")
+    func completedSurveysUsesISO8601() throws {
+        let defaults = makeFreshUserDefaults()
+        let storage = UserDefaultsEligibilityStorage(userDefaults: defaults)
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+
+        var completed = storage.completedSurveys
+        completed["checkout-feedback"] = date
+        storage.completedSurveys = completed
+
+        let data = defaults.data(forKey: "eu.WhiskrKit.completedSurveys")!
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: String]
+        let dateString = json["checkout-feedback"]!
+        #expect(dateString.contains("2023-11-14"))
+    }
+}
+
+// MARK: - Completed Surveys Context Encoding Tests
+
+@Suite("Completed Surveys Context Encoding Tests")
+struct CompletedSurveysContextEncodingTests {
+
+    @Test("Context with completedSurveys encodes to valid JSON")
+    func contextWithCompletedSurveysEncodesCorrectly() throws {
+        let context = SurveyEligibilityContext(
+            deviceId: "test-id",
+            appVersion: "1.0",
+            locale: "en-US",
+            sessionCount: 1,
+            installDate: Date(timeIntervalSince1970: 1_700_000_000),
+            lastSurveyDate: nil,
+            completedSurveys: [
+                "checkout-feedback": Date(timeIntervalSince1970: 1_705_000_000),
+                "onboarding-nps": Date(timeIntervalSince1970: 1_710_000_000)
+            ]
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(context)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        let completedSurveys = json["completedSurveys"] as? [String: String]
+        #expect(completedSurveys != nil)
+        #expect(completedSurveys?.count == 2)
+        #expect(completedSurveys?["checkout-feedback"] != nil)
+        #expect(completedSurveys?["onboarding-nps"] != nil)
+    }
+
+    @Test("Context with empty completedSurveys encodes as empty object")
+    func emptyCompletedSurveysEncodesAsEmptyObject() throws {
+        let context = SurveyEligibilityContext(
+            deviceId: "test-id",
+            appVersion: "1.0",
+            locale: "en-US",
+            sessionCount: 1,
+            installDate: Date(timeIntervalSince1970: 1_700_000_000),
+            lastSurveyDate: nil,
+            completedSurveys: [:]
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(context)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        let completedSurveys = json["completedSurveys"] as? [String: String]
+        #expect(completedSurveys == [:])
+    }
+}
+
+// MARK: - RemoveFromHistory Service Tests
+
+@Suite("RemoveFromHistory Service Tests")
+@MainActor
+struct RemoveFromHistoryServiceTests {
+
+    private func makeSUT(
+        network: MockEligibilityNetworkService = MockEligibilityNetworkService(),
+        storage: MockEligibilityStorage = MockEligibilityStorage()
+    ) -> (EligibilityService, MockEligibilityNetworkService, MockEligibilityStorage) {
+        let service = EligibilityService(networkService: network, storage: storage)
+        return (service, network, storage)
+    }
+
+    @Test("When removeFromHistory is true, surveyId is removed from completedSurveys")
+    func removeFromHistoryRemovesSurvey() async {
+        let (sut, network, storage) = makeSUT()
+        storage.completedSurveys["checkout-feedback"] = Date()
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: true)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.completedSurveys["checkout-feedback"] == nil)
+    }
+
+    @Test("When removeFromHistory is true, nextCheckAfter for that survey is also removed")
+    func removeFromHistoryClearsNextCheckAfter() async {
+        let (sut, network, storage) = makeSUT()
+        storage.completedSurveys["checkout-feedback"] = Date()
+        storage.setNextCheckAfter(Date().addingTimeInterval(-1), for: "checkout-feedback")
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: Date().addingTimeInterval(3600), removeFromHistory: true)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.nextCheckAfter(for: "checkout-feedback") == nil)
+    }
+
+    @Test("When removeFromHistory is false, completedSurveys is unchanged")
+    func removeFromHistoryFalseKeepsSurvey() async {
+        let (sut, network, storage) = makeSUT()
+        let completionDate = Date()
+        storage.completedSurveys["checkout-feedback"] = completionDate
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: false)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.completedSurveys["checkout-feedback"] != nil)
+    }
+
+    @Test("When removeFromHistory is nil, completedSurveys is unchanged")
+    func removeFromHistoryNilKeepsSurvey() async {
+        let (sut, network, storage) = makeSUT()
+        storage.completedSurveys["checkout-feedback"] = Date()
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: nil)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.completedSurveys["checkout-feedback"] != nil)
+    }
+
+    @Test("Removing a surveyId that doesn't exist in completedSurveys doesn't crash")
+    func removeFromHistoryNonExistentSurveyIsSafe() async {
+        let (sut, network, _) = makeSUT()
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: true)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "nonexistent-survey")
+        // No crash = test passes
+    }
+}
+
+// MARK: - Eligibility Integration Tests
+
+@Suite("Eligibility Integration Tests")
+@MainActor
+struct EligibilityIntegrationTests {
+
+    private func makeToastSurveyTemplate() -> SurveyTemplate {
+        SurveyTemplate(presentationBase: .toast(base: ToastTemplate(
+            id: "test-toast",
+            title: "Test",
+            description: nil,
+            followUpIdentifier: nil,
+            survey: nil
+        )))
+    }
+
+    @Test("completedSurveys is included in the eligibility context sent to the server")
+    func completedSurveysIncludedInContext() async {
+        let network = MockEligibilityNetworkService()
+        let storage = MockEligibilityStorage()
+        storage.completedSurveys["checkout-feedback"] = Date()
+        let service = EligibilityService(networkService: network, storage: storage)
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: nil)
+        network.eligibilityResult = .success(response)
+
+        _ = await service.checkEligibility(for: "some-survey")
+
+        #expect(network.eligibilityCallCount == 1)
+    }
+
+    @Test("removeFromHistory cleans up local state for the survey")
+    func removeFromHistoryCleansLocalState() async {
+        let network = MockEligibilityNetworkService()
+        let storage = MockEligibilityStorage()
+        storage.completedSurveys["checkout-feedback"] = Date()
+        storage.setNextCheckAfter(Date().addingTimeInterval(-1), for: "checkout-feedback")
+        let service = EligibilityService(networkService: network, storage: storage)
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: true)
+        network.eligibilityResult = .success(response)
+
+        _ = await service.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.completedSurveys["checkout-feedback"] == nil)
+        #expect(storage.nextCheckAfter(for: "checkout-feedback") == nil)
     }
 }
