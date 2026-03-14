@@ -55,6 +55,6 @@ jobs:
         run: |
           xcodebuild test \
             -scheme WhiskrKit \
-			-destination 'platform=iOS Simulator,name=iPhone Air,OS=26.2' \
+			-destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
