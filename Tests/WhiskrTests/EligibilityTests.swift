@@ -219,7 +219,7 @@ struct EligibilityServiceTests {
         network: MockEligibilityNetworkService = MockEligibilityNetworkService(),
         storage: MockEligibilityStorage = MockEligibilityStorage()
     ) -> (EligibilityService, MockEligibilityNetworkService, MockEligibilityStorage) {
-        let service = EligibilityService(networkService: network, storage: storage)
+        let service = WhiskrKitEligibilityService(networkService: network, storage: storage)
         return (service, network, storage)
     }
 
@@ -311,7 +311,9 @@ struct EligibilityServiceTests {
 
     @Test("Concurrent eligibility checks for the same survey ID are deduplicated")
     func deduplicatesConcurrentChecksForSameSurveyId() async {
-        let (sut, network, _) = makeSUT()
+        let network = MockEligibilityNetworkService()
+        let storage = MockEligibilityStorage()
+        let service = WhiskrKitEligibilityService(networkService: network, storage: storage)
 
         // Add a delay so the second task can observe the first as in-flight at the await point
         network.delayNanoseconds = 100_000_000 // 100 ms
@@ -321,8 +323,8 @@ struct EligibilityServiceTests {
 
         // Both tasks run on @MainActor and interleave at the await point inside checkEligibility.
         // The second task will see "checkout-feedback" in inFlightSurveyIds and return nil immediately.
-        async let first = sut.checkEligibility(for: "checkout-feedback")
-        async let second = sut.checkEligibility(for: "checkout-feedback")
+        async let first = service.checkEligibility(for: "checkout-feedback")
+        async let second = service.checkEligibility(for: "checkout-feedback")
 
         _ = await (first, second)
 
@@ -624,7 +626,7 @@ struct RemoveFromHistoryServiceTests {
         network: MockEligibilityNetworkService = MockEligibilityNetworkService(),
         storage: MockEligibilityStorage = MockEligibilityStorage()
     ) -> (EligibilityService, MockEligibilityNetworkService, MockEligibilityStorage) {
-        let service = EligibilityService(networkService: network, storage: storage)
+        let service = WhiskrKitEligibilityService(networkService: network, storage: storage)
         return (service, network, storage)
     }
 
@@ -715,7 +717,7 @@ struct EligibilityIntegrationTests {
         let network = MockEligibilityNetworkService()
         let storage = MockEligibilityStorage()
         storage.completedSurveys["checkout-feedback"] = Date()
-        let service = EligibilityService(networkService: network, storage: storage)
+        let service = WhiskrKitEligibilityService(networkService: network, storage: storage)
 
         let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: nil)
         network.eligibilityResult = .success(response)
@@ -731,7 +733,7 @@ struct EligibilityIntegrationTests {
         let storage = MockEligibilityStorage()
         storage.completedSurveys["checkout-feedback"] = Date()
         storage.setNextCheckAfter(Date().addingTimeInterval(-1), for: "checkout-feedback")
-        let service = EligibilityService(networkService: network, storage: storage)
+        let service = WhiskrKitEligibilityService(networkService: network, storage: storage)
 
         let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: true)
         network.eligibilityResult = .success(response)
