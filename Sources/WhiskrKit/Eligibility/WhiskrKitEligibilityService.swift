@@ -14,11 +14,6 @@ protocol EligibilityService {
 }
 
 /// Manages per-survey eligibility checks.
-///
-/// All methods run on the `@MainActor`, which ensures that the in-flight set
-/// is checked and modified atomically around every `await` suspension point —
-/// preventing duplicate network calls when the same survey identifier appears
-/// on multiple views simultaneously.
 @MainActor
 final class WhiskrKitEligibilityService: EligibilityService {
 

@@ -20,7 +20,7 @@ public class WhiskrKit {
     private var eligibilityService: EligibilityService?
 
     private init() {
-		configurationService = MockConfigurationService()
+		configurationService = WhiskrKitConfigurationService()
     }
 
 

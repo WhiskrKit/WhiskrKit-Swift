@@ -26,8 +26,7 @@ final class WhiskrKitConfigurationService: ConfigurationService {
 
     init(
         networkService: NetworkService = NetworkService(
-			baseURL: URL(string: "http://localhost:8080")!
-//            baseURL: URL(string: "https://app.whiskrkit.eu")!
+            baseURL: URL(string: "https://app.whiskrkit.eu")!
         ),
         submissionQueue: SubmissionQueue = SubmissionQueue()
     ) {
