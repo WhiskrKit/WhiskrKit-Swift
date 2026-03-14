@@ -6,25 +6,27 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build:
-    name: Build (macOS ${{ matrix.os }}, Xcode ${{ matrix.xcode }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-26]
-        xcode: ['26']
+    name: Build
+    runs-on: macos-26
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
-
-      - name: Show environment
-        run: |
-          swift --version
-          xcodebuild -version
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
 
       - name: Build
         run: |
@@ -35,19 +37,19 @@ jobs:
             CODE_SIGNING_REQUIRED=NO
 
   test:
-    name: Test (macOS ${{ matrix.os }}, Xcode ${{ matrix.xcode }})
-    runs-on: ${{ matrix.os }}
-    needs: [build]
-    strategy:
-      matrix:
-        os: [macos-26]
-        xcode: ['26']
+    name: Test
+    runs-on: macos-26
+    needs: build
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
 
       - name: Test
         run: |
