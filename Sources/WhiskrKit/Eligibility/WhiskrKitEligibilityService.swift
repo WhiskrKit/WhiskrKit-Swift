@@ -9,6 +9,10 @@
 import Foundation
 import OSLog
 
+protocol EligibilityService {
+	func checkEligibility(for surveyId: String) async -> SurveyTemplate?
+}
+
 /// Manages per-survey eligibility checks.
 ///
 /// All methods run on the `@MainActor`, which ensures that the in-flight set
@@ -16,7 +20,7 @@ import OSLog
 /// preventing duplicate network calls when the same survey identifier appears
 /// on multiple views simultaneously.
 @MainActor
-final class EligibilityService {
+final class WhiskrKitEligibilityService: EligibilityService {
 
     private let networkService: NetworkService
     private let storage: any EligibilityStorage

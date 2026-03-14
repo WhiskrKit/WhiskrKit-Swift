@@ -20,7 +20,7 @@ public class WhiskrKit {
     private var eligibilityService: EligibilityService?
 
     private init() {
-		configurationService = WhiskrKitConfigurationService()
+		configurationService = MockConfigurationService()
     }
 
 
@@ -34,18 +34,21 @@ public class WhiskrKit {
 	///   - withMockedSurveys: A boolean indicating whether to use mocked survey data for testing purposes.
 	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool) {
         self.apiKey = apiKey
-		if mockedSurveys {
-			configurationService = MockConfigurationService()
-		}
-        configurationService.configure(apiKey: apiKey)
+		configurationService.configure(apiKey: apiKey)
 
-        // Eligibility context tracking
-        eligibilityStorage.initializeIfNeeded()
-        eligibilityStorage.incrementSessionCount()
-        eligibilityService = EligibilityService(
-            networkService: configurationService.networkService,
-            storage: eligibilityStorage
-        )
+		if mockedSurveys {
+			let mockService = MockConfigurationService()
+			configurationService = mockService
+			eligibilityService = MockEligibilityService(configurationService: mockService)
+		} else {
+			// Eligibility context tracking
+			eligibilityStorage.initializeIfNeeded()
+			eligibilityStorage.incrementSessionCount()
+			eligibilityService = WhiskrKitEligibilityService(
+				networkService: configurationService.networkService,
+				storage: eligibilityStorage
+			)
+		}
     }
 
 
