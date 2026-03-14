@@ -16,8 +16,10 @@ final class MockConfigurationService: ConfigurationService {
         // Since this is a mock, not really applicable here
     }
 
-    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async {
+    @discardableResult
+    func submitSurveyResponse(surveyId: String, response: SurveyResponse) async -> Bool {
         Logger.wkNetworking.info("💾 User saved the following information: surveyId: \(surveyId) response: \(response.results)")
+        return true
     }
 
     let networkService: NetworkService

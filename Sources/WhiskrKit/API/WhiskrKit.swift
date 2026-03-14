@@ -16,6 +16,9 @@ public class WhiskrKit {
     var theme: WhiskrKitTheme?
     private var configurationService: ConfigurationService
 
+    private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
+    private var eligibilityService: EligibilityService?
+
     private init() {
 		configurationService = WhiskrKitConfigurationService()
     }
@@ -31,10 +34,21 @@ public class WhiskrKit {
 	///   - withMockedSurveys: A boolean indicating whether to use mocked survey data for testing purposes.
 	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool) {
         self.apiKey = apiKey
+		configurationService.configure(apiKey: apiKey)
+
 		if mockedSurveys {
-			configurationService = MockConfigurationService()
+			let mockService = MockConfigurationService()
+			configurationService = mockService
+			eligibilityService = MockEligibilityService(configurationService: mockService)
+		} else {
+			// Eligibility context tracking
+			eligibilityStorage.initializeIfNeeded()
+			eligibilityStorage.incrementSessionCount()
+			eligibilityService = WhiskrKitEligibilityService(
+				networkService: configurationService.networkService,
+				storage: eligibilityStorage
+			)
 		}
-        configurationService.configure(apiKey: apiKey)
     }
 
 
@@ -70,6 +84,14 @@ public class WhiskrKit {
 	public func setTheme(_ theme: WhiskrKitTheme) {
 		self.theme = theme
 	}
+    internal func checkEligibility(for surveyId: String) async -> SurveyTemplate? {
+        guard apiKey != nil else {
+            Logger.wkCore.critical("WhiskrKit is not initialized with an API key. Call initialize(apiKey:) first.")
+            return nil
+        }
+        return await eligibilityService?.checkEligibility(for: surveyId)
+    }
+
     internal func fetchSurveyTemplate<T>(for identifier: String) async -> T? where T: Decodable {
         guard apiKey != nil else {
             Logger.wkCore.critical("WhiskrKit is not initialized with with an API key. Call initialize(apiKey:) first.")
@@ -84,6 +106,17 @@ public class WhiskrKit {
             return
         }
 
-        await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
+        let success = await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
+        if success {
+            trackSurveyCompletion(surveyId: surveyId)
+        }
+    }
+
+    private func trackSurveyCompletion(surveyId: String) {
+        var completed = eligibilityStorage.completedSurveys
+        completed[surveyId] = Date()
+        eligibilityStorage.completedSurveys = completed
+        eligibilityStorage.setNextCheckAfter(nil, for: surveyId)
+        Logger.wkCore.info("📋 Tracked completion for survey '\(surveyId)'")
     }
 }

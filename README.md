@@ -1,6 +1,6 @@
 ![WhiskrKit logo](https://whiskrkit.eu/_astro/WhiskrKit_logo.ForvUlK9_2cXvNV.webp)
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
+![version](https://img.shields.io/badge/version-0.1.3-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
 # WhiskrKit for iOS (Swift) - The purr-fect feedback toolkit for modern apps.
 
@@ -10,7 +10,7 @@ WhiskrKit provides a flexible and easy-to-use API for presenting various types o
 
 Before this framework has *production state*, the following items need to be added: 
 
-- [ ] Mechanism to show surveys based on triggers like: time, app restarts, user size of the host app, or manual triggering with a button.
+- [x] Mechanism to show surveys based on triggers like: time, app restarts, user size of the host app, or manual triggering with a button.
 - [ ] iPad specific layout.
 - [ ] Implement follow-up option to App Store Rating.
 - [ ] (In consideration) A dedicated WhiskrKit button that developers can add to their apps to let users manually open a questionnaire.

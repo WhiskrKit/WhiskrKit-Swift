@@ -36,7 +36,7 @@ class NetworkService {
             throw WhiskrKitError.notInitialized
         }
         
-        let url = baseURL.appendingPathComponent("survey/\(identifier)")
+        let url = baseURL.appendingPathComponent("api/v1/survey/\(identifier)")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = requestTimeout
@@ -47,6 +47,29 @@ class NetworkService {
         return try await performGetRequest(request, type: T.self)
     }
     
+    func checkEligibility(
+        surveyId: String,
+        context: SurveyEligibilityContext
+    ) async throws -> SurveyEligibilityResponse {
+        guard let apiKey = apiKey else {
+            throw WhiskrKitError.notInitialized
+        }
+
+        let url = baseURL.appendingPathComponent("api/v1/survey/\(surveyId)/eligible")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = requestTimeout
+
+        addCommonHeaders(to: &request, apiKey: apiKey)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(context)
+
+        return try await performPostRequestWithResponse(request, type: SurveyEligibilityResponse.self)
+    }
+
     func submitRating(
         surveyId: String,
         identifier: String,
@@ -57,7 +80,7 @@ class NetworkService {
             throw WhiskrKitError.notInitialized
         }
         
-        let url = baseURL.appendingPathComponent("survey/\(surveyId)/submit")
+        let url = baseURL.appendingPathComponent("api/v1/survey/\(surveyId)/submit")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = requestTimeout
@@ -74,7 +97,7 @@ class NetworkService {
         request.httpBody = try JSONEncoder().encode(surveyResponse)
         
         try await performPostRequest(request)
-    }
+	}
     
     // MARK: - GET Request Handler
     
@@ -154,6 +177,47 @@ class NetworkService {
         }
     }
     
+    // MARK: - POST Request Handler with Response Body
+
+    private func performPostRequestWithResponse<T: Decodable>(
+        _ request: URLRequest,
+        type: T.Type,
+        attempt: Int = 0
+    ) async throws -> T {
+        do {
+            let (data, response) = try await urlSession.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WhiskrKitError.invalidResponse
+            }
+
+            try handleStatusCode(httpResponse.statusCode, isRetryable: false)
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            do {
+                return try decoder.decode(T.self, from: data)
+            } catch {
+                throw WhiskrKitError.decodingFailed(error)
+            }
+
+        } catch let error as WhiskrKitError {
+            if shouldRetryPost(error: error, attempt: attempt) {
+                let backoffDelay = calculateBackoff(attempt: attempt)
+                try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
+                return try await performPostRequestWithResponse(request, type: type, attempt: attempt + 1)
+            }
+            throw error
+        } catch {
+            if attempt < maxRetries {
+                let backoffDelay = calculateBackoff(attempt: attempt)
+                try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
+                return try await performPostRequestWithResponse(request, type: type, attempt: attempt + 1)
+            }
+            throw WhiskrKitError.networkError(error)
+        }
+    }
+
     // MARK: - Helper Methods
     
     private func addCommonHeaders(to request: inout URLRequest, apiKey: String) {
