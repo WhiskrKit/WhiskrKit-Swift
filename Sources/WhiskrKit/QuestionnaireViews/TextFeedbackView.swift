@@ -49,7 +49,7 @@ struct TextFeedbackView: View {
             VStack(alignment: .leading, spacing: 16) {
                 TextField(placeholder, text: $feedbackText, axis: .vertical)
                     .padding()
-                    .background(.ultraThickMaterial)
+					.background(.regularMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)

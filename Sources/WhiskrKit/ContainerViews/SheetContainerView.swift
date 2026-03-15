@@ -52,6 +52,9 @@ struct SheetContainerView: View {
                 surveyResponse: $surveyResponse
             )
             .environment(submissionAlert)
+            if template.followUpQuestion != nil, !surveyResponse.results.isEmpty {
+                followUpView
+            }
             submitButton
         }
         .padding(.vertical)
@@ -66,6 +69,21 @@ struct SheetContainerView: View {
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(WhiskrKitButtonStyle(variant: .primary))
+    }
+
+    private var followUpView: some View {
+        TextFeedbackView(
+            template: TextSurveyTemplate(
+                id: "\(template.id)-followUp",
+                title: template.followUpQuestion,
+                description: nil,
+                isRequired: false,
+                A11yLabel: nil,
+                a11yHint: nil
+            ),
+            surveyResponse: $surveyResponse
+        )
+		.environment(submissionAlert)
     }
 
     @ViewBuilder
@@ -104,7 +122,7 @@ struct SheetContainerView: View {
             id: "1234",
             title: "Quick feedback",
             description: "We'd love to hear from you",
-            writtenFollowUp: true,
+            followUpQuestion: "Tell us more about your experience",
             survey: SurveyPresentation(
                 surveyBase: .scaleRating(
                     base:
@@ -134,7 +152,7 @@ struct SheetContainerView: View {
                     id: "1234",
                     title: "Quick feedback",
                     description: "We'd love to hear from you",
-                    writtenFollowUp: true,
+                    followUpQuestion: "What do you need?",
                     survey: SurveyPresentation(
                         surveyBase: .scaleRating(
                             base:
@@ -152,7 +170,7 @@ struct SheetContainerView: View {
                 )
             )
             .modifier(ContentHeightSheet())
-            .environment(\.WhiskrKitTheme, .systemStyle)
+			.environment(\.WhiskrKitTheme, .systemStyle)
             .environment(submissionAlert)
         }
 }
