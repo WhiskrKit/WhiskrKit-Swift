@@ -12,6 +12,6 @@ struct SheetTemplate: Decodable {
     let id: String
     let title: String?
     let description: String?
-    let writtenFollowUp: Bool
+    let followUpQuestion: String?
     let survey: SurveyPresentation
 }

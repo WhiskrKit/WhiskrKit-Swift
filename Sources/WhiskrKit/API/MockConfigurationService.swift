@@ -75,7 +75,7 @@ final class MockConfigurationService: ConfigurationService {
             id: "sheet-1",
             title: "Welcome aboard!",
             description: "Help us understand your needs better",
-            writtenFollowUp: true,
+            followUpQuestion: "What could we do better?",
             surveyType: .scaleRating
         )
 
@@ -83,7 +83,6 @@ final class MockConfigurationService: ConfigurationService {
             id: "sheet-2",
             title: "New Feature Feedback",
             description: "What do you think of our latest update?",
-            writtenFollowUp: true,
             surveyType: .symbolRating
         )
 
@@ -91,7 +90,6 @@ final class MockConfigurationService: ConfigurationService {
             id: "sheet-3",
             title: "How was your checkout?",
             description: "We'd love to hear your thoughts",
-            writtenFollowUp: true,
             surveyType: .thumbsRating
         )
 
@@ -99,7 +97,6 @@ final class MockConfigurationService: ConfigurationService {
             id: "sheet-4",
             title: "What would you ask us?",
             description: "We'd love to hear your thoughts about your car's extended warranty",
-            writtenFollowUp: false,
             surveyType: .textualSurvey
         )
 
@@ -161,7 +158,7 @@ final class MockConfigurationService: ConfigurationService {
         id: String,
         title: String?,
         description: String?,
-        writtenFollowUp: Bool,
+        followUpQuestion: String? = nil,
         surveyType: SurveyPresentation.SurveyType
     ) -> SurveyTemplate {
         let survey = createSurveyPresentation(type: surveyType, id: "\(id)-survey")
@@ -170,7 +167,7 @@ final class MockConfigurationService: ConfigurationService {
             id: id,
             title: title,
             description: description,
-            writtenFollowUp: writtenFollowUp,
+            followUpQuestion: followUpQuestion,
             survey: survey
         )
 
