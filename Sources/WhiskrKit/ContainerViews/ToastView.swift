@@ -11,6 +11,7 @@ import OSLog
 import SwiftUI
 
 struct ToastView: View {
+	@AccessibilityFocusState private var isFocused: Bool
     @State private var offSetY: CGFloat = 50
     @State private var formed: Bool = false
     @State private var submissionAlert = SubmissionAlert()
@@ -43,6 +44,7 @@ struct ToastView: View {
         VStack(alignment: .leading) {
             HStack(alignment: .top) {
                 titleAndDescription
+					.accessibilityFocused($isFocused)
                 Spacer()
                 closeButton
             }
@@ -69,6 +71,10 @@ struct ToastView: View {
                 isVisible = true
             }
         }
+		.task {
+			try? await Task.sleep(for: .milliseconds(300))
+			isFocused = true
+		}
         .gesture(
             DragGesture()
                 .onChanged { gesture in

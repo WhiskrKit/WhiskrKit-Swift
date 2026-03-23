@@ -10,6 +10,7 @@ import SwiftUI
 import OSLog
 
 struct SheetContainerView: View {
+	@AccessibilityFocusState private var isFocused: Bool
     @Environment(\.dismiss) var dismiss
     @State private var submissionAlert = SubmissionAlert()
 
@@ -23,8 +24,7 @@ struct SheetContainerView: View {
             results: [:] // Initializes with empty results
         )
     }
-    
-    // TODO: - Answers in sheet are always required, except the to be implemented writtenFollowUp
+
     var canSubmit: Bool {
         return surveyResponse.results[template.survey.surveyBase.id] != nil
     }
@@ -45,6 +45,7 @@ struct SheetContainerView: View {
                 Spacer()
                 closeButton
             }
+			.accessibilityFocused($isFocused)
             Divider()
                 .padding(.vertical, 8)
             TemplateViewBuilder.buildSingleContent(
@@ -59,6 +60,10 @@ struct SheetContainerView: View {
         }
         .padding(.vertical)
         .padding(.horizontal, 24)
+		.task {
+			try? await Task.sleep(for: .milliseconds(100))
+			isFocused = true
+		}
     }
 
     private var submitButton: some View {
