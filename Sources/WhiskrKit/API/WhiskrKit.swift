@@ -7,9 +7,11 @@
 //
 
 import SwiftUI
+import Observation
 import OSLog
 
 @MainActor
+@Observable
 public class WhiskrKit {
     public static let shared = WhiskrKit()
 
@@ -19,6 +21,8 @@ public class WhiskrKit {
 
     private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
     private var eligibilityService: EligibilityService?
+
+	var pendingSurveyId: String? = nil
 
     private init() {
 		configurationService = WhiskrKitConfigurationService()
@@ -85,6 +89,45 @@ public class WhiskrKit {
 	public func setTheme(_ theme: WhiskrKitTheme) {
 		self.theme = theme
 	}
+
+	/// Imperatively presents a survey with the given identifier, bypassing eligibility checks.
+	///
+	/// Use this method to trigger a survey programmatically, for example, from a button tap,
+	/// a remote push notification, or any other non-automatic trigger. Unlike the
+	/// `whiskrKitSurvey(identifier:)` view modifier, this method does not evaluate eligibility
+	/// rules before presenting.
+	///
+	/// - Parameter surveyId: The identifier of the survey to present.
+	///
+	/// - Note: At least one view in your app's hierarchy must have `whiskrKit()` or the `whiskrKitSurvey(identifier:)`
+	///   modifier attached for the survey to appear. If no modifier is active, the call is a no-op.
+	///
+	/// - Important: This method must be called after `initialize(apiKey:withMockedSurveys:)`.
+	///
+	/// ## Example: Presenting from a button
+	/// ```swift
+	/// Button("Give Feedback") {
+	///     WhiskrKit.shared.present(surveyId: "nps-survey")
+	/// }
+	/// ```
+	///
+	/// ## Example: Presenting from a push notification
+	/// ```swift
+	/// func userNotificationCenter(
+	///     _ center: UNUserNotificationCenter,
+	///     didReceive response: UNNotificationResponse,
+	///     withCompletionHandler completionHandler: @escaping () -> Void
+	/// ) {
+	///     if let surveyId = response.notification.request.content.userInfo["whiskrkit_survey_id"] as? String {
+	///         WhiskrKit.shared.present(surveyId: surveyId)
+	///     }
+	///     completionHandler()
+	/// }
+	/// ```
+	public func present(surveyId: String) {
+		 pendingSurveyId = surveyId
+	 }
+
     internal func checkEligibility(for surveyId: String) async -> SurveyTemplate? {
         guard apiKey != nil else {
             Logger.wkCore.critical("WhiskrKit is not initialized with an API key. Call initialize(apiKey:) first.")
