@@ -8,6 +8,7 @@
 
 import Foundation
 
+@MainActor
 final class SubmissionQueue {
     private var submissions: [PendingSubmission] = []
     private let storage: SubmissionStorage

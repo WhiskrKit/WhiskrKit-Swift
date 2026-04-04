@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+@MainActor
 class NetworkService {
     private let baseURL: URL
     private var apiKey: String?

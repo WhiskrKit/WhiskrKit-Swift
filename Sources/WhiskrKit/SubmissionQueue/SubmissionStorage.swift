@@ -9,6 +9,7 @@
 import Foundation
 import OSLog
 
+@MainActor
 protocol SubmissionStorage {
     func save(_ submissions: [PendingSubmission])
     func load() -> [PendingSubmission]

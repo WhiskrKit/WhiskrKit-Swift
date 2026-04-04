@@ -40,9 +40,8 @@ final class MockConfigurationService: ConfigurationService {
     func fetchSurveyTemplate<T>(for identifier: String) async throws -> T? where T: Decodable {
         // Simulate network delay
         try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-        print("count", inlineTemplates.count)
         // Return the template if it exists, nil otherwise
-        return templates[identifier] as? T //?? inlineTemplates[identifier] as? T
+        return templates[identifier] as? T
     }
 
     // MARK: - Mock Template Setup

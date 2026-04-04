@@ -8,6 +8,7 @@
 
 import Observation
 
+@MainActor
 @Observable
 final class SubmissionAlert {
     var showAlert: [String: Bool] = [:]

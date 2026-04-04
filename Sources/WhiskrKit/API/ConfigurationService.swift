@@ -9,6 +9,7 @@
 import Foundation
 import OSLog
 
+@MainActor
 protocol ConfigurationService {
     var networkService: NetworkService { get }
     func fetchSurveyTemplate<T>(for identifier: String) async throws -> T? where T: Decodable
@@ -17,7 +18,7 @@ protocol ConfigurationService {
     func retryPendingSubmissions() async
     func configure(apiKey: String)
 }
-
+@MainActor
 final class WhiskrKitConfigurationService: ConfigurationService {
     let networkService: NetworkService
 
