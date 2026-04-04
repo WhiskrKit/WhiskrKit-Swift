@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+@MainActor
 final class TemplateViewBuilder {
     static func buildView(for presentation: SurveyPresentation, surveyResponse: Binding<SurveyResponse>) -> some View {
         Group {

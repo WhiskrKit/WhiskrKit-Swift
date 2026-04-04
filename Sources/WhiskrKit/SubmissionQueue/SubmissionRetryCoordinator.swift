@@ -10,6 +10,7 @@ import Foundation
 import OSLog
 import UIKit
 
+@MainActor
 final class SubmissionRetryCoordinator {
     private let queue: SubmissionQueue
     private let networkService: NetworkService

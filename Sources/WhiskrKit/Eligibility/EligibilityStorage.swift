@@ -9,6 +9,7 @@
 import Foundation
 import OSLog
 
+@MainActor
 protocol EligibilityStorage: AnyObject {
     var deviceId: String { get }
     var sessionCount: Int { get }

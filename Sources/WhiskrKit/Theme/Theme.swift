@@ -151,6 +151,7 @@ extension WhiskrKitTheme {
     )
 }
 
+@MainActor
 public extension WhiskrKitTheme.ButtonTheme.ButtonAppearance {
 	static func style<S: ButtonStyle>(_ style: S) -> Self {
 		.custom(AnyButtonStyle(style))

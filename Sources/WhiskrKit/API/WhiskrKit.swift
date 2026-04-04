@@ -9,6 +9,7 @@
 import SwiftUI
 import OSLog
 
+@MainActor
 public class WhiskrKit {
     public static let shared = WhiskrKit()
 

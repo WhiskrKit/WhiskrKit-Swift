@@ -9,12 +9,12 @@
 import Foundation
 import OSLog
 
+@MainActor
 protocol EligibilityService {
 	func checkEligibility(for surveyId: String) async -> SurveyTemplate?
 }
 
 /// Manages per-survey eligibility checks.
-@MainActor
 final class WhiskrKitEligibilityService: EligibilityService {
 
     private let networkService: NetworkService
