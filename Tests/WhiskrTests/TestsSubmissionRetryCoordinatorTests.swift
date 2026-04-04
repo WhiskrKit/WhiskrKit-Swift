@@ -9,6 +9,7 @@ import Testing
 import Foundation
 @testable import WhiskrKit
 
+@MainActor
 @Suite("Submission Retry Coordinator Tests")
 struct SubmissionRetryCoordinatorTests {
     

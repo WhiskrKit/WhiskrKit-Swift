@@ -9,6 +9,7 @@ import Testing
 import Foundation
 @testable import WhiskrKit
 
+@MainActor
 @Suite("WhiskrKit Core Tests")
 struct WhiskrKitCoreTests {
     
@@ -62,6 +63,7 @@ struct WhiskrKitCoreTests {
 
 // MARK: - Configuration Service Tests
 
+@MainActor
 @Suite("Configuration Service Tests")
 struct ConfigurationServiceTests {
     

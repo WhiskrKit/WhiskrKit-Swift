@@ -9,6 +9,7 @@ import Testing
 import Foundation
 @testable import WhiskrKit
 
+@MainActor
 @Suite("Submission Queue Tests")
 struct SubmissionQueueTests {
     

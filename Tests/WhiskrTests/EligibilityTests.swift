@@ -96,6 +96,7 @@ final class MockEligibilityNetworkService: NetworkService {
 
 // MARK: - UserDefaults Storage Tests
 
+@MainActor
 @Suite("Eligibility Storage Tests")
 struct EligibilityStorageTests {
 
@@ -475,6 +476,7 @@ struct SurveyEligibilityResponseTests {
 
 // MARK: - Completed Surveys Storage Tests
 
+@MainActor
 @Suite("Completed Surveys Storage Tests")
 struct CompletedSurveysStorageTests {
 
