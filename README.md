@@ -1,4 +1,4 @@
-![WhiskrKit logo](https://whiskrkit.eu/_astro/WhiskrKit_logo.ForvUlK9_2cXvNV.webp)
+![WhiskrKit logo](https://whiskrkit.eu/WhiskrKit_logo.png)
 
 ![version](https://img.shields.io/badge/version-0.1.5-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
