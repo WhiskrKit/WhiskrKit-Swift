@@ -99,6 +99,13 @@ final class MockConfigurationService: ConfigurationService {
             surveyType: .textualSurvey
         )
 
+		templates["choice-survey"] = createSheetTemplate(
+			id: "sheet-5",
+			title: "You recently visited the Avatar",
+			description: nil,
+			surveyType: .multipleChoice
+		)
+
         // Full Screen Form Templates
         templates["detailed-survey"] = createFullScreenFormTemplate(
             id: "form-1",
@@ -249,6 +256,22 @@ final class MockConfigurationService: ConfigurationService {
                 A11yLabel: nil,
                 A11yHint: nil
             ))
+		case .multipleChoice:
+			surveyBase = .multipleChoice(
+				base: MultipleChoiceTemplate(
+					id: id,
+					title: "What element is your strength?",
+					subtitle: nil,
+					isRequired: true,
+					options: [
+						MultipleChoiceOption(id: "1", label: "Water"),
+						MultipleChoiceOption(id: "2", label: "Fire"),
+						MultipleChoiceOption(id: "3", label: "Earth"),
+						MultipleChoiceOption(id: "4", label: "Air")
+					],
+					allowsMultiSelection: true
+				)
+			)
         }
 
         return SurveyPresentation(surveyBase: surveyBase)

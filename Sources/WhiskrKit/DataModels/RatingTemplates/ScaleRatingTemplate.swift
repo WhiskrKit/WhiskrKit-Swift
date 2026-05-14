@@ -6,7 +6,7 @@
 //  Licensed under the MIT License. See LICENSE file for details.
 //
 
-import SwiftUI
+import Foundation
 
 struct ScaleRatingTemplate: Decodable {
     let id: String

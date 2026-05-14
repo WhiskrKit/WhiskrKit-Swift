@@ -16,6 +16,7 @@ struct SurveyPresentation: Decodable {
         case symbolRating
         case thumbsRating
         case textualSurvey
+		case multipleChoice
     }
     
     enum SurveyBase: Decodable {
@@ -23,6 +24,7 @@ struct SurveyPresentation: Decodable {
         case symbolRating(base: SymbolRatingTemplate)
         case textualSurvey(base: TextSurveyTemplate)
         case thumbsRating(base: ThumbsSurveyTemplate)
+		case multipleChoice(base: MultipleChoiceTemplate)
     }
     
     public enum CodingKeys: CodingKey {
@@ -49,6 +51,9 @@ struct SurveyPresentation: Decodable {
         case .thumbsRating:
             let surveyBase = try ThumbsSurveyTemplate(from: decoder)
             self.surveyBase = .thumbsRating(base: surveyBase)
+		case .multipleChoice:
+			let surveyBase = try MultipleChoiceTemplate(from: decoder)
+			self.surveyBase = .multipleChoice(base: surveyBase)
         }
     }
 }
@@ -60,6 +65,7 @@ extension SurveyPresentation.SurveyBase {
         case .symbolRating(let base): base.isRequired
         case .textualSurvey(let base): base.isRequired
         case .thumbsRating(let base): base.isRequired
+		case .multipleChoice(let base): base.isRequired
         }
     }
     
@@ -69,6 +75,7 @@ extension SurveyPresentation.SurveyBase {
         case .symbolRating(let base): base.id
         case .textualSurvey(let base): base.id
         case .thumbsRating(let base): base.id
+		case .multipleChoice(let base): base.id
         }
     }
 }

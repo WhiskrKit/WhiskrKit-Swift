@@ -12,7 +12,7 @@ import SwiftUI
 struct TextFeedbackView: View {
     @Environment(SubmissionAlert.self) private var submissionAlert: SubmissionAlert
     @State private var feedbackText: String = ""
-    @Binding var surveyReponse: SurveyResponse
+    @Binding var surveyResponse: SurveyResponse
     
     
     @FocusState private var isTextFieldFocused: Bool
@@ -37,7 +37,7 @@ struct TextFeedbackView: View {
         surveyResponse: Binding<SurveyResponse>
     ) {
         self.template = template
-        self._surveyReponse = surveyResponse
+        self._surveyResponse = surveyResponse
     }
     
     var body: some View {
@@ -66,9 +66,9 @@ struct TextFeedbackView: View {
                         submissionAlert.showAlert[template.id] = (template.isRequired && newValue.count == .zero)
                         
                         if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            surveyReponse.results.removeValue(forKey: template.id)
+                            surveyResponse.results.removeValue(forKey: template.id)
                         } else {
-                            surveyReponse.results[template.id] = .textualSurvey(newValue)
+                            surveyResponse.results[template.id] = .textualSurvey(newValue)
                         }
                     }
                 HStack {
