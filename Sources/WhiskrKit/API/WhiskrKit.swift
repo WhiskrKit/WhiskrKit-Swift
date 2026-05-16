@@ -148,14 +148,14 @@ public class WhiskrKit {
 	///     SettingsView()
 	/// }
 	/// .onDismiss {
-	///     Task {
-	///         await WhiskrKit.shared.checkAndPresent(surveyId: "settings-feedback")
-	///     }
+	///         WhiskrKit.shared.checkAndPresent(surveyId: "settings-feedback")
 	/// }
 	/// ```
-	public func checkAndPresent(surveyId: String) async {
-		guard await isEligible(for: surveyId) else { return }
-		pendingSurveyId = surveyId
+	public func checkAndPresent(surveyId: String) {
+		Task {
+			guard await isEligible(for: surveyId) else { return }
+			pendingSurveyId = surveyId
+		}
 	}
 
     internal func checkEligibility(for surveyId: String) async -> SurveyTemplate? {
