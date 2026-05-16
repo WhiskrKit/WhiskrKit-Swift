@@ -73,7 +73,6 @@ struct SymbolRatingView: View {
     }
 }
 
-@available(iOS 18, watchOS 11, *)
 #Preview {
     @Previewable @State var submissionAlert = SubmissionAlert()
     

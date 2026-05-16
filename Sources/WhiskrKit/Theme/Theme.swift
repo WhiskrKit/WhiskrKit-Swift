@@ -10,6 +10,7 @@ import SwiftUI
 
 public struct WhiskrKitTheme: Sendable {
     var container: ContainerTheme?
+	var selectionColor: SelectionTheme?
     var button: ButtonTheme
     var title: TextTheme
     var subtitle: TextTheme
@@ -19,6 +20,7 @@ public struct WhiskrKitTheme: Sendable {
     
     public init(
         container: ContainerTheme? = nil,
+		selectionColor: SelectionTheme? = nil,
         button: ButtonTheme,
         title: TextTheme,
         subtitle: TextTheme,
@@ -27,6 +29,7 @@ public struct WhiskrKitTheme: Sendable {
         body: TextTheme
     ) {
         self.container = container
+		self.selectionColor = selectionColor
         self.button = button
         self.title = title
         self.subtitle = subtitle
@@ -34,7 +37,17 @@ public struct WhiskrKitTheme: Sendable {
         self.subheadline = subheadline
         self.body = body
     }
-    
+
+	public struct SelectionTheme: Sendable {
+		public var tintColor: Color
+		public var backgroundColor: Color
+
+		public init(tintColor: Color, backgroundColor: Color) {
+			self.tintColor = tintColor
+			self.backgroundColor = backgroundColor
+		}
+	}
+
 	public struct ButtonTheme: Sendable {
 		var primary: ButtonAppearance
 		var secondary: ButtonAppearance
@@ -90,7 +103,7 @@ public struct WhiskrKitTheme: Sendable {
         public var sheet: OverlayView?
         public var fullScreen: OverlayView?
         public var toast: Toast?
-        
+
         public init(
             sheet: OverlayView? = nil,
             fullScreen: OverlayView? = nil,
@@ -100,8 +113,7 @@ public struct WhiskrKitTheme: Sendable {
             self.fullScreen = fullScreen
             self.toast = toast
         }
-        
-        
+
         public struct OverlayView: Sendable {
             public var backgroundColor: Color
             
@@ -139,6 +151,10 @@ extension WhiskrKitTheme {
                 withShadow: false
             )
         ),
+		selectionColor: .init(
+			tintColor: Color(.label),
+			backgroundColor: Color(.tertiarySystemBackground)
+		),
         button: .init(
 			primary: .variant(.init(backgroundColor: Color(.label), textColor: Color(.systemBackground), font: .body.weight(.medium), cornerRadius: 10, size: .compact)),
 			secondary: .variant(.init(backgroundColor: .clear, textColor: Color(.label), font: .body, cornerRadius: 8))
@@ -352,6 +368,12 @@ public struct AnyButtonStyle: ButtonStyle, @unchecked Sendable {
 				.subheadline()
 			Text("coming to an iPhone near you")
 				.body()
+			ChoiceView(
+				label: "Welcome to the internet",
+				isSelected: true,
+				isMultiSelect: false,
+				onTap: {}
+			)
 			Button("Primary", action: {})
 				.buttonStyle(WhiskrKitButtonStyle(variant: .primary))
 			Button("Secondary", action: {})

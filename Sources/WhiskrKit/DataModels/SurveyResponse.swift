@@ -16,13 +16,15 @@ struct SurveyResponse: Codable, Equatable {
         case symbolRating(Int)
         case thumbsRating(ThumbsRating)
         case textualSurvey(String)
+		case multipleChoice([String])
 
 		enum CodingKeys: String, CodingKey {
-			  case npsRating
-			  case symbolRating
-			  case thumbsRating
-			  case textualSurvey
-		  }
+			case npsRating
+			case symbolRating
+			case thumbsRating
+			case textualSurvey
+			case multipleChoice
+		}
 
 		func encode(to encoder: Encoder) throws {
 			var container = encoder.container(keyedBy: CodingKeys.self)
@@ -35,6 +37,8 @@ struct SurveyResponse: Codable, Equatable {
 				try container.encode(rating, forKey: .thumbsRating)
 			case .textualSurvey(let feedback):
 				try container.encode(feedback, forKey: .textualSurvey)
+			case .multipleChoice(let feedback):
+				try container.encode(feedback, forKey: .multipleChoice)
 			}
 		}
 
@@ -49,6 +53,8 @@ struct SurveyResponse: Codable, Equatable {
 				self = .thumbsRating(rating)
 			} else if let feedback = try container.decodeIfPresent(String.self, forKey: .textualSurvey) {
 				self = .textualSurvey(feedback)
+			} else if let feedback = try container.decodeIfPresent([String].self, forKey: .multipleChoice) {
+				self = .multipleChoice(feedback)
 			} else {
 				throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "No valid survey type found"))
 			}

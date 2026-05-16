@@ -21,6 +21,8 @@ final class TemplateViewBuilder {
                 TextFeedbackView(template: base, surveyResponse: surveyResponse)
             case .thumbsRating(let base):
                 ThumbsRatingView(template: base, surveyResponse: surveyResponse)
+			case .multipleChoice(base: let base):
+				MultipleChoiceQuestionView(template: base, surveyResponse: surveyResponse)
             }
         }
     }

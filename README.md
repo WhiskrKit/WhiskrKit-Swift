@@ -1,6 +1,6 @@
 ![WhiskrKit logo](https://whiskrkit.eu/WhiskrKit_logo.png)
 
-![version](https://img.shields.io/badge/version-0.1.5-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
+![version](https://img.shields.io/badge/version-0.1.6-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
 # WhiskrKit for iOS (Swift) - The purr-fect feedback toolkit for modern apps.
 
@@ -22,10 +22,10 @@ contact us directly via the dashboard (once available) or via mail.
 
 ## Features
 
-* **Multiple Questionnaire Types**: Star ratings, thumbs up/down, NPS ratings, textual entry
+* **Multiple Questionnaire Types**: Star ratings, thumbs up/down, NPS ratings, textual entry, multiple choice
 * **Flexible Presentation Styles**: Sheets, toasts, full-screen covers
 * **Highly Customizable**: Colors, fonts, layouts, behaviors, and content
-* **Accessibility First**: Full VoiceOver and accessibility support
+* **Accessibility First**: Full VoiceOver and Dynamic Type support
 * **Haptic Feedback**: Enhanced user experience
 
 ## Quick Start
@@ -62,7 +62,7 @@ To set a theme, you supply:
   </li>
   <li>A button theme
     <ul>
-      <li>A primary, secondary and tertiary option</li>
+      <li>A primary and secondary option</li>
     </ul>
   </li>
   <li>Several text themes, with font and color
@@ -72,8 +72,8 @@ To set a theme, you supply:
   </li>
 </ul>
 
-WhiskrKit supports font scaling and dark mode natively, but you have to make sure to 
-supply supporting colors and fonts for optimal results.
+WhiskrKit supports Dynamic Type and dark mode natively, but you have to make sure to 
+supply adaptive colors and fonts for optimal results.
 
 Go to the `Theme.swift` file in this project to look for an example of how to make 
 a theme. You can also use the provided `systemStyle` theme preset for your project 

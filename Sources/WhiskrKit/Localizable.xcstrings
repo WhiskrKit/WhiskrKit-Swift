@@ -125,6 +125,9 @@
         }
       }
     },
+    "checked" : {
+
+    },
     "close_button_label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -132,6 +135,20 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Close"
+          }
+        }
+      }
+    },
+    "Double tap to select" : {
+
+    },
+    "form_required_multipleChoice_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please select an option before submitting"
           }
         }
       }
@@ -252,6 +269,9 @@
           }
         }
       }
+    },
+    "unchecked" : {
+
     }
   },
   "version" : "1.1"
