@@ -131,6 +131,14 @@ final class MockConfigurationService: ConfigurationService {
             surveyTypes: [.scaleRating, .textualSurvey, .symbolRating, .thumbsRating]
         )
 
+		templates["super-survey"] = createFullScreenFormTemplate(
+			id: "form-3",
+			title: "Main Road Construction",
+			subtitle: "Residents satisfaction survey of Main Road Ave",
+			description: "We'd like to ask you how your experience was during the construction of Main Road Ave last month. This will help us improve future construction work of the town.",
+			surveyTypes: [.scaleRating, .textualSurvey, .symbolRating, .thumbsRating, .multipleChoice]
+		)
+
         inlineTemplates["inline-nps"] = createSurveyPresentation(type: .scaleRating, id: "nps-1")
     }
 

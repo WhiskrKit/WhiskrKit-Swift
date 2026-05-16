@@ -36,8 +36,8 @@ public class WhiskrKit {
 	///
 	/// - Parameters:
 	///   - apiKey: Your WhiskrKit API key used for authentication and survey management. When using the mocked option, use a random String.
-	///   - withMockedSurveys: A boolean indicating whether to use mocked survey data for testing purposes.
-	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool) {
+	///   - withMockedSurveys: A boolean indicating whether to use mocked survey data for testing purposes. Its default is set to false.
+	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool = false) {
         self.apiKey = apiKey
 		configurationService.configure(apiKey: apiKey)
 
@@ -128,13 +128,48 @@ public class WhiskrKit {
 		 pendingSurveyId = surveyId
 	 }
 
+	/// Checks eligibility for a survey and presents it if the user qualifies.
+	///
+	/// Use this when you want backend-controlled targeting but need to trigger
+	/// the check at a specific moment, for example, when a sheet is dismissed
+	/// or after a user completes a flow.
+	///
+	/// Unlike `present(surveyId:)`, this method respects eligibility rules.
+	/// Unlike the `whiskrKitSurvey(identifier:)` modifier, the timing is yours to control.
+	///
+	/// - Parameter surveyId: The identifier of the survey to evaluate and potentially present.
+	///
+	/// - Note: At least one view in your app's hierarchy must have `.whiskrKit()` or
+	///   `.whiskrKitSurvey(identifier:)` attached for the survey to appear.
+	///
+	/// ## Example: Presenting after sheet dismissal
+	/// ```swift
+	/// .sheet(isPresented: $showingSettings) {
+	///     SettingsView()
+	/// }
+	/// .onDismiss {
+	///     Task {
+	///         await WhiskrKit.shared.checkAndPresent(surveyId: "settings-feedback")
+	///     }
+	/// }
+	/// ```
+	public func checkAndPresent(surveyId: String) async {
+		guard await isEligible(for: surveyId) else { return }
+		pendingSurveyId = surveyId
+	}
+
     internal func checkEligibility(for surveyId: String) async -> SurveyTemplate? {
         guard apiKey != nil else {
             Logger.wkCore.critical("WhiskrKit is not initialized with an API key. Call initialize(apiKey:) first.")
             return nil
         }
+
         return await eligibilityService?.checkEligibility(for: surveyId)
     }
+
+	internal func isEligible(for surveyId: String) async -> Bool {
+		await checkEligibility(for: surveyId) != nil
+	}
 
     internal func fetchSurveyTemplate<T>(for identifier: String) async -> T? where T: Decodable {
         guard apiKey != nil else {
