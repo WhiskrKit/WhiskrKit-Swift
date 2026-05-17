@@ -1,6 +1,6 @@
 ![WhiskrKit logo](https://whiskrkit.eu/WhiskrKit_logo.png)
 
-![version](https://img.shields.io/badge/version-0.1.6-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
+![version](https://img.shields.io/badge/version-0.1.7-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
 # WhiskrKit for iOS (Swift) - The purr-fect feedback toolkit for modern apps.
 
@@ -104,6 +104,24 @@ struct HomeView: View {
     }
 }
 ```
+
+### Event-driven trigger with backend targeting (hybrid)
+
+Sometimes you want the timing to be yours but the targeting decision to stay with the backend, for example, checking whether to show a survey after a user dismisses a sheet or completes a flow.
+
+Use `checkAndPresent(surveyId:)` for this. It runs the eligibility check and only presents the survey if the user qualifies:
+
+```swift
+.sheet(isPresented: $showingSettings, onDismiss: {
+    WhiskrKit.shared.checkAndPresent(surveyId: "settings-feedback")
+}) {
+    SettingsView()
+}
+```
+
+Unlike `present(surveyId:)`, this method respects your targeting and repeat policy rules. Unlike the `.whiskrKitSurvey(identifier:)` modifier, the moment it fires is entirely up to you.
+
+> **Note:** `.whiskrKit()` must still be present somewhere in the view hierarchy for the survey to appear.
 
 ### Manual presentation
 

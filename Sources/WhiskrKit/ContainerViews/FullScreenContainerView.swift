@@ -60,8 +60,8 @@ struct FullScreenContainerView: View {
                     Spacer()
                     submitButton
                 }
+				.padding(.horizontal)
             }
-            .padding(.horizontal)
             .background(
                 WhiskrKitTheme.container?.fullScreen?.backgroundColor.ignoresSafeArea()
             )
@@ -75,7 +75,7 @@ struct FullScreenContainerView: View {
             }
         }
     }
-    
+
     private var submitButton: some View {
         Button {
             submitSurvey()
