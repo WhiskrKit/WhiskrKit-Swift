@@ -12,6 +12,7 @@ import OSLog
 struct SheetContainerView: View {
 	@AccessibilityFocusState private var isFocused: Bool
     @Environment(\.dismiss) var dismiss
+    @Environment(\.whiskrKitDismiss) private var panelDismiss
     @State private var submissionAlert = SubmissionAlert()
 
     let template: SheetTemplate
@@ -94,12 +95,21 @@ struct SheetContainerView: View {
     @ViewBuilder
     private var closeButton: some View {
         Button {
-            dismiss()
+            dismissSurvey()
         } label: {
             Image(systemName: "xmark")
                 .circularClose()
         }
         .accessibilityLabel(.accessibilityCloseButtonLabel)
+    }
+
+    /// Dismisses the survey regardless of how it is hosted. In the native `.sheet`
+    /// path `dismiss()` does the work and `panelDismiss` is a no-op; in the
+    /// floating panel window `dismiss()` is a no-op and `panelDismiss` tears the
+    /// window down.
+    private func dismissSurvey() {
+        dismiss()
+        panelDismiss()
     }
 
     private func submitSurvey() {
@@ -111,13 +121,28 @@ struct SheetContainerView: View {
                     response: surveyResponse
                 )
             }
-            dismiss()
+            dismissSurvey()
         } else {
             withAnimation {
                 // Set alert for the required survey that's missing a response
 				submissionAlert.showAlert[template.survey.surveyBase.id] = true
             }
         }
+    }
+}
+
+private struct WhiskrKitDismissKey: EnvironmentKey {
+    static let defaultValue: @MainActor @Sendable () -> Void = {}
+}
+
+extension EnvironmentValues {
+    /// A WhiskrKit-owned dismiss hook so survey content can be torn down from
+    /// either the native `.sheet` or the floating panel window. Defaults to a
+    /// no-op; the floating panel injects window teardown here, while the sheet
+    /// path leaves it as the no-op and relies on the system `\.dismiss`.
+    var whiskrKitDismiss: @MainActor @Sendable () -> Void {
+        get { self[WhiskrKitDismissKey.self] }
+        set { self[WhiskrKitDismissKey.self] = newValue }
     }
 }
 

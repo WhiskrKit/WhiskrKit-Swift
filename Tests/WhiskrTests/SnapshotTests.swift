@@ -268,6 +268,70 @@ struct SnapshotTests {
         )
     }
 
+    /// Renders the iPad floating panel with a fixed content height. The card
+    /// otherwise sizes itself from an async content measurement that never settles
+    /// inside a snapshot (the same reason the sheet snapshots above use
+    /// `SheetContainerView` directly), so a deterministic height is injected.
+    private func snapPanel(
+        _ placement: SheetPlacement,
+        sizeClass: UIUserInterfaceSizeClass = .regular,
+        width: CGFloat,
+        height: CGFloat,
+        contentHeight: CGFloat = 380,
+        named name: String? = nil,
+        fileID: StaticString = #fileID,
+        filePath: StaticString = #filePath,
+        testName: String = #function,
+        line: UInt = #line,
+        column: UInt = #column
+    ) {
+        let panel = FloatingPanelView(
+            template: sheetTemplate,
+            placement: placement,
+            onDismiss: {},
+            previewContentHeight: contentHeight
+        )
+        .environment(\.WhiskrKitTheme, .systemStyle)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+
+        let traits = UITraitCollection { mutable in
+            mutable.userInterfaceStyle = .light
+            mutable.horizontalSizeClass = sizeClass
+        }
+
+        assertSnapshot(
+            of: panel,
+            as: .image(layout: .fixed(width: width, height: height), traits: traits),
+            named: name,
+            fileID: fileID,
+            file: filePath,
+            testName: testName,
+            line: line,
+            column: column
+        )
+    }
+
+    @Test("Floating panel — leading side card (regular width)")
+    func panel_leading() {
+        snapPanel(.leading, width: 768, height: 600)
+    }
+
+    @Test("Floating panel — trailing side card (regular width)")
+    func panel_trailing() {
+        snapPanel(.trailing, width: 768, height: 600)
+    }
+
+    @Test("Floating panel — bottom centered (regular width)")
+    func panel_bottomCentered() {
+        snapPanel(.bottomCentered, width: 768, height: 600)
+    }
+
+    @Test("Floating panel — compact falls back to full-width bottom card")
+    func panel_compactFallback() {
+        snapPanel(.leading, sizeClass: .compact, width: 390, height: 600)
+    }
+
     @Test("Full screen form")
     func fullScreenContent() {
         snap(
