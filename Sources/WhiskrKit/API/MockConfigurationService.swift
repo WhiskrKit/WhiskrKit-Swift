@@ -103,6 +103,7 @@ final class MockConfigurationService: ConfigurationService {
 			id: "sheet-5",
 			title: "You recently visited the Avatar",
 			description: nil,
+			followUpQuestion: "What did you like most?",
 			surveyType: .multipleChoice
 		)
 
