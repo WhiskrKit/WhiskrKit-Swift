@@ -139,6 +139,17 @@
         }
       }
     },
+    "doneButtonLabel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
+    },
     "Double tap to select" : {
 
     },

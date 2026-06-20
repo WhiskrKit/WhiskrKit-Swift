@@ -6,6 +6,7 @@
 //  Licensed under the MIT License. See LICENSE file for details.
 //
 
+import Combine
 import SwiftUI
 import OSLog
 
@@ -17,7 +18,8 @@ struct FullScreenContainerView: View {
     let template: FullScreenFormTemplate
     
     @State private var surveyResponse: SurveyResponse
-    
+	@State private var keyboardVisible = false
+
     init(template: FullScreenFormTemplate) {
         self.template = template
         self.surveyResponse = SurveyResponse(
@@ -62,6 +64,24 @@ struct FullScreenContainerView: View {
                 }
 				.padding(.horizontal)
             }
+			.scrollDismissesKeyboard(.interactively)
+			.safeAreaInset(edge: .bottom) {
+				if keyboardVisible {
+					HStack {
+						Spacer()
+						Button(.doneButtonLabel) {
+							UIApplication.shared.sendAction(
+								#selector(UIResponder.resignFirstResponder),
+								to: nil, from: nil, for: nil
+							)
+						}
+						.glassButtonStyleIfAvailable()
+					}
+					.padding(.horizontal)
+					.padding(.vertical, 8)
+					.barBackgroundIfAvailable()
+				}
+			}
             .background(
                 WhiskrKitTheme.container?.fullScreen?.backgroundColor.ignoresSafeArea()
             )
@@ -73,8 +93,14 @@ struct FullScreenContainerView: View {
                     closeButton
                 }
             }
+			.onReceive(
+				Publishers.Merge(
+					NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification).map { _ in true },
+					NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification).map { _ in false }
+				)
+			) { keyboardVisible = $0 }
         }
-    }
+	}
 
     private var submitButton: some View {
         Button {
@@ -121,6 +147,24 @@ extension View {
             self
         }
     }
+
+	@ViewBuilder
+	func glassButtonStyleIfAvailable() -> some View {
+		if #available(iOS 26, *) {
+			self.buttonStyle(.glass)
+		} else {
+			self
+		}
+	}
+
+	@ViewBuilder
+	func barBackgroundIfAvailable() -> some View {
+		if #available(iOS 26, *) {
+			self.background(.clear)
+		} else {
+			self.background(.bar)
+		}
+	}
 }
 
 #Preview("FullScreenContainerView - Main") {

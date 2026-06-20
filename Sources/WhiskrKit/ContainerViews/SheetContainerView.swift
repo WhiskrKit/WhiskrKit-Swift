@@ -58,6 +58,17 @@ struct SheetContainerView: View {
             }
             submitButton
         }
+		.toolbar {
+			ToolbarItemGroup(placement: .keyboard) {
+				Spacer()
+				Button(.doneButtonLabel) {
+					UIApplication.shared.sendAction(
+						#selector(UIResponder.resignFirstResponder),
+						to: nil, from: nil, for: nil
+					)
+				}
+			}
+		}
         .padding(.vertical)
         .padding(.horizontal, 24)
 		.task {
