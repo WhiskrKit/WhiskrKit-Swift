@@ -1,6 +1,6 @@
 ![WhiskrKit logo](https://whiskrkit.eu/WhiskrKit_logo.png)
 
-![version](https://img.shields.io/badge/version-0.1.7-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
+![version](https://img.shields.io/badge/version-0.1.8-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
 # WhiskrKit for iOS (Swift) - The purr-fect feedback toolkit for modern apps.
 
@@ -13,7 +13,7 @@ Before this framework has *production state*, the following items need to be add
 
 - [x] Mechanism to show surveys based on triggers like: time, app restarts, user 
       size of the host app, or manual triggering.
-- [ ] iPad specific layout.
+- [x] iPad specific layout.
 - [ ] Implement follow-up option to App Store Rating.
 
 For feature requests or changes to this native Swift version of WhiskrKit, you can 
@@ -24,6 +24,7 @@ contact us directly via the dashboard (once available) or via mail.
 
 * **Multiple Questionnaire Types**: Star ratings, thumbs up/down, NPS ratings, textual entry, multiple choice
 * **Flexible Presentation Styles**: Sheets, toasts, full-screen covers
+* **Adaptive iPad Layout**: on wide screens, sheet surveys become floating panels and toasts can be corner-anchored, with integrator-selectable placement
 * **Highly Customizable**: Colors, fonts, layouts, behaviors, and content
 * **Accessibility First**: Full VoiceOver and Dynamic Type support
 * **Haptic Feedback**: Enhanced user experience
@@ -164,6 +165,58 @@ func userNotificationCenter(
 
 > **Note:** If `present(surveyId:)` is called but no view with `.whiskrKit()` is 
 > active in the hierarchy, the call is a no-op and no survey will appear.
+
+## Adaptive iPad presentation
+
+On wide (regular width) screens, iPad full screen, and large Stage Manager or 
+Split View windows, a `sheet`-style survey renders as a **floating panel** instead 
+of a full-width bottom sheet, and a `toast`-style survey can be anchored to a corner 
+or centered. On compact width (iPhone, narrow Split View, Slide Over) both fall back 
+to the familiar full-width bottom presentation. Layout follows the horizontal size 
+class, so it re-resolves live as windows resize.
+
+Placement is a code-owned, ambient preference, only the integrating app knows which 
+edges of its layout are free, so you set it like SwiftUI's own `.tint`, never as an 
+argument to `.whiskrKitSurvey(identifier:)`. It is read only when a survey resolves to 
+the matching style in regular width: toasts ignore sheet placement and vice versa, and 
+fullscreen surveys ignore both.
+
+Three placements are available for each style:
+
+* `.leading` - bottom-leading corner card
+* `.trailing` - bottom-trailing corner card
+* `.bottomCentered` - centered, width-capped card
+
+Both default to `.bottomCentered`, which is safe in any layout (it never lands on top 
+of a host's edge navigation), so existing apps get the adaptive upgrade for free 
+without any code change.
+
+### App-wide defaults
+
+Set the defaults once, typically at launch:
+
+```swift
+WhiskrKit.configure {
+    $0.defaultSheetPlacement = .trailing
+    $0.defaultToastPlacement = .bottomCentered
+}
+```
+
+### Per-subtree override
+
+Override placement for part of your view hierarchy when you know that edge is free. 
+Sheet and toast placement are independent axes, so you can set them separately. Place 
+the modifier in the same view tree where the survey is triggered:
+
+```swift
+SomeDetailView()
+    .whiskrKitSheetPlacement(.leading)   // sheet surveys here → leading panel
+    .whiskrKitToastPlacement(.trailing)  // toast surveys here → trailing
+```
+
+The iPad sheet panel is **non-modal**: it sizes to the survey, can be swiped down to 
+dismiss, and taps outside the card pass through to your app, which stays interactive 
+behind it.
 
 ## Platform Compatibility
 

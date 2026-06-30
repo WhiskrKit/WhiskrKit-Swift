@@ -82,6 +82,7 @@ public struct WhiskrKitTheme: Sendable {
         public var textColor: Color
         public var font: Font
         public var cornerRadius: CGFloat
+        public var size: ButtonSize
 
         public init(
             backgroundColor: Color,
@@ -96,6 +97,7 @@ public struct WhiskrKitTheme: Sendable {
             self.textColor = textColor
             self.font = font
             self.cornerRadius = cornerRadius
+            self.size = size
         }
     }
     
@@ -156,7 +158,7 @@ extension WhiskrKitTheme {
 			backgroundColor: Color(.tertiarySystemBackground)
 		),
         button: .init(
-			primary: .variant(.init(backgroundColor: Color(.label), textColor: Color(.systemBackground), font: .body.weight(.medium), cornerRadius: 10, size: .compact)),
+			primary: .variant(.init(backgroundColor: Color(.label), textColor: Color(.systemBackground), font: .body.weight(.medium), cornerRadius: 10)),
 			secondary: .variant(.init(backgroundColor: .clear, textColor: Color(.label), font: .body, cornerRadius: 8))
 		),
         title: .init(font: .title2.weight(.bold), color: .primary),
@@ -177,7 +179,13 @@ public extension WhiskrKitTheme.ButtonTheme.ButtonAppearance {
 enum WhiskrKitButtonVariant {
 	case primary, secondary
 }
-public enum ButtonSize {
+
+/// The rendered size of a themed button.
+///
+/// `normal` uses the system's default button padding; `compact` uses reduced
+/// padding, matching the rendering WhiskrKit itself uses for buttons in
+/// space-constrained contexts such as toasts.
+public enum ButtonSize: Sendable {
     case normal, compact
 }
 
@@ -197,7 +205,7 @@ struct WhiskrKitButtonStyle: ButtonStyle {
 		switch appearance {
 		case .variant(let theme):
 			configuration.label
-				.padding(.all, isCompact ? 10 : nil)
+				.padding(.all, (isCompact || theme.size == .compact) ? 10 : nil)
 				.font(theme.font)
 				.background(theme.backgroundColor)
 				.foregroundStyle(theme.textColor)

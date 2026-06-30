@@ -192,12 +192,18 @@ struct ToastView: View {
 }
 
 struct ToastModifier: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Binding var isPresented: Bool
     let template: ToastTemplate?
+    var placement: ToastPlacement = .bottomCentered
     var openFollowUp: (String) -> Void
 
+    private var isCompact: Bool { horizontalSizeClass != .regular }
+
     func body(content: Content) -> some View {
-        ZStack(alignment: .bottom) {
+        // Placement only changes where the toast sits and how wide it is. Compact width
+        // always falls back to the full-width bottom toast.
+        ZStack(alignment: placement.edge.alignment(isCompact: isCompact)) {
             content
             if isPresented, let template {
                 ToastView(
@@ -205,6 +211,11 @@ struct ToastModifier: ViewModifier {
                     template: template,
                     openFollowUp: openFollowUp
                 )
+                .frame(maxWidth: placement.edge.maxWidth(isCompact: isCompact, side: 380, centered: 480))
+                // Lift the placed toast off the display edges in regular width
+                // (a corner-anchored side toast otherwise sits flush against the
+                // border). Compact keeps the toast's own full-width margins.
+                .padding(isCompact ? 0 : 16)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .zIndex(1)
             }
@@ -216,12 +227,14 @@ extension View {
     func toast(
         isPresented: Binding<Bool>,
         template: ToastTemplate?,
+        placement: ToastPlacement = .bottomCentered,
         openFollowUp: @escaping (String) -> Void
     ) -> some View {
         self.modifier(
             ToastModifier(
                 isPresented: isPresented,
                 template: template,
+                placement: placement,
                 openFollowUp: openFollowUp
             )
         )
