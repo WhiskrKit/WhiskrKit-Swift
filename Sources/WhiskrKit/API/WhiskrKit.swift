@@ -136,7 +136,8 @@ public class WhiskrKit {
 	/// - Parameter surveyId: The identifier of the survey to present.
 	///
 	/// - Note: At least one view in your app's hierarchy must have `whiskrKit()` or the `whiskrKitSurvey(identifier:)`
-	///   modifier attached for the survey to appear. If no modifier is active, the call is a no-op.
+	///   modifier attached for the survey to appear, or, in a UIKit app, a window registered via
+	///   ``attach(to:)``. If no attachment point is active, the call is a no-op.
 	///
 	/// - Important: This method must be called after `initialize(apiKey:withMockedSurveys:)`.
 	///
@@ -176,7 +177,8 @@ public class WhiskrKit {
 	/// - Parameter surveyId: The identifier of the survey to evaluate and potentially present.
 	///
 	/// - Note: At least one view in your app's hierarchy must have `.whiskrKit()` or
-	///   `.whiskrKitSurvey(identifier:)` attached for the survey to appear.
+	///   `.whiskrKitSurvey(identifier:)` attached for the survey to appear, or, in a
+	///   UIKit app, a window registered via ``attach(to:)``.
 	///
 	/// ## Example: Presenting after sheet dismissal
 	/// ```swift

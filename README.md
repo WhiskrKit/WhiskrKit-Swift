@@ -24,6 +24,7 @@ contact us directly via the dashboard (once available) or via mail.
 
 * **Multiple Questionnaire Types**: Star ratings, thumbs up/down, NPS ratings, textual entry, multiple choice
 * **Flexible Presentation Styles**: Sheets, toasts, full-screen covers
+* **SwiftUI and UIKit**: a one-line view modifier for SwiftUI apps, a one-line window attachment for UIKit and hybrid apps
 * **Adaptive iPad Layout**: on wide screens, sheet surveys become floating panels and toasts can be corner-anchored, with integrator-selectable placement
 * **Highly Customizable**: Colors, fonts, layouts, behaviors, and content
 * **Accessibility First**: Full VoiceOver and Dynamic Type support
@@ -165,6 +166,50 @@ func userNotificationCenter(
 
 > **Note:** If `present(surveyId:)` is called but no view with `.whiskrKit()` is 
 > active in the hierarchy, the call is a no-op and no survey will appear.
+
+## Using WhiskrKit in UIKit apps
+
+Not a SwiftUI app? No problem. WhiskrKit works just as well in classic UIKit apps, 
+and in apps built with hybrid frameworks (React Native, Flutter add-to-app) where 
+the SwiftUI modifiers have no view hierarchy to attach to.
+
+Instead of the `.whiskrKit()` modifier, register your window once with 
+`attach(to:)`, typically right after your scene sets it up:
+
+```swift
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = MainViewController()
+        window.makeKeyAndVisible()
+        self.window = window
+
+        WhiskrKit.shared.initialize(apiKey: "your-api-key")
+        WhiskrKit.shared.attach(to: window)
+    }
+}
+```
+
+That's the whole integration. From here the entire API works exactly as in a 
+SwiftUI app: trigger surveys with `present(surveyId:)` or 
+`checkAndPresent(surveyId:)`, style them with `setTheme(_:)`, and set placement 
+defaults with `WhiskrKit.configure { ... }`. All presentation styles render, 
+including the adaptive iPad floating panel.
+
+Surveys appear in a transparent overlay above your window. While nothing is on 
+screen the overlay is completely pass-through, and a toast survey only captures 
+touches on the toast itself, so your app stays fully interactive.
+
+Use one attachment point per app: either `attach(to:)` **or** the SwiftUI 
+modifiers, not both. Multi-scene apps can call `detach()` from 
+`sceneDidDisconnect(_:)` and re-attach when the next scene connects.
 
 ## Adaptive iPad presentation
 
