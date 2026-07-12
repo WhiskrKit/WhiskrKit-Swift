@@ -70,6 +70,10 @@ public extension View {
 	/// - Note: If `WhiskrKit.shared.present(surveyId:)` is called but no view with
 	///   `.whiskrKit()` is active in the hierarchy, the call is a no-op and no survey
 	///   will appear.
+	///
+	/// - Note: In a UIKit-based app (or a hybrid framework such as React Native),
+	///   use ``WhiskrKit/WhiskrKit/attach(to:)`` instead, it registers a window as
+	///   the attachment point and provides the same behavior as this modifier.
 	func whiskrKit() -> some View {
 		modifier(WhiskrKitSurveyModifier(identifier: nil))
 	}

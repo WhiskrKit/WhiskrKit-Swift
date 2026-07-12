@@ -216,6 +216,19 @@ struct ToastModifier: ViewModifier {
                 // (a corner-anchored side toast otherwise sits flush against the
                 // border). Compact keeps the toast's own full-width margins.
                 .padding(isCompact ? 0 : 16)
+                // Reports the toast's frame so `SurveyHostWindow` (the UIKit
+                // attachment) can keep everything outside it pass-through. A
+                // background GeometryReader rather than onGeometryChange so the
+                // preference falls back to `.zero` by itself when the toast
+                // leaves the hierarchy. Unused (never read) in the SwiftUI path.
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(
+                            key: SurveyToastFramePreferenceKey.self,
+                            value: proxy.frame(in: .global)
+                        )
+                    }
+                )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .zIndex(1)
             }
