@@ -17,12 +17,13 @@ public class WhiskrKit {
 
     private var apiKey: String?
     var theme: WhiskrKitTheme?
+    var configuration = Configuration()
     private var configurationService: ConfigurationService
 
     private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
     private var eligibilityService: EligibilityService?
 
-	var pendingSurveyId: String? = nil
+	var pendingSurveyRequest: PendingSurveyRequest? = nil
 
     private init() {
 		configurationService = WhiskrKitConfigurationService()
@@ -90,6 +91,41 @@ public class WhiskrKit {
 		self.theme = theme
 	}
 
+	/// Code-owned, app-wide WhiskrKit preferences that are not survey content.
+	///
+	/// Unlike a survey's style (decided on the dashboard), these are layout hints
+	/// only the integrating app can know. Set them once via ``WhiskrKit/configure(_:)``.
+	public struct Configuration: Sendable {
+		/// The placement used when a `sheet`-style survey renders as a floating
+		/// panel on a wide (regular width) screen and no nearer
+		/// ``SwiftUI/View/whiskrKitSheetPlacement(_:)`` override applies.
+		///
+		/// Defaults to ``SheetPlacement/bottomCentered`` because a default has to
+		/// be safe in an app the SDK knows nothing about, and centered-and-inset
+		/// is the only placement that cannot land on top of a host's navigation.
+		public var defaultSheetPlacement: SheetPlacement = .bottomCentered
+
+		/// The placement used when a `toast`-style survey renders on a wide
+		/// (regular width) screen and no nearer
+		/// ``SwiftUI/View/whiskrKitToastPlacement(_:)`` override applies. A separate
+		/// axis from ``defaultSheetPlacement``; defaults to the safe, centered
+		/// ``ToastPlacement/bottomCentered``.
+		public var defaultToastPlacement: ToastPlacement = .bottomCentered
+
+		public init() {}
+	}
+
+	/// Sets app-wide WhiskrKit preferences. Call once, typically at launch.
+	///
+	/// ```swift
+	/// WhiskrKit.configure { $0.defaultSheetPlacement = .trailing }
+	/// ```
+	///
+	/// - Parameter body: A closure that mutates the shared ``Configuration``.
+	public static func configure(_ body: (inout Configuration) -> Void) {
+		body(&shared.configuration)
+	}
+
 	/// Imperatively presents a survey with the given identifier, bypassing eligibility checks.
 	///
 	/// Use this method to trigger a survey programmatically, for example, from a button tap,
@@ -125,7 +161,7 @@ public class WhiskrKit {
 	/// }
 	/// ```
 	public func present(surveyId: String) {
-		 pendingSurveyId = surveyId
+		 pendingSurveyRequest = .fetch(surveyId: surveyId)
 	 }
 
 	/// Checks eligibility for a survey and presents it if the user qualifies.
@@ -153,8 +189,8 @@ public class WhiskrKit {
 	/// ```
 	public func checkAndPresent(surveyId: String) {
 		Task {
-			guard await isEligible(for: surveyId) else { return }
-			pendingSurveyId = surveyId
+			guard let template = await checkEligibility(for: surveyId) else { return }
+			pendingSurveyRequest = .present(template)
 		}
 	}
 
@@ -166,10 +202,6 @@ public class WhiskrKit {
 
         return await eligibilityService?.checkEligibility(for: surveyId)
     }
-
-	internal func isEligible(for surveyId: String) async -> Bool {
-		await checkEligibility(for: surveyId) != nil
-	}
 
     internal func fetchSurveyTemplate<T>(for identifier: String) async -> T? where T: Decodable {
         guard apiKey != nil else {

@@ -78,6 +78,13 @@ public extension View {
 struct WhiskrKitSurveyModifier: ViewModifier {
     let identifier: String?
 
+    // Read at the trigger's own site so the panel window, which does not inherit
+    // the host's environment, can be handed the resolved placement and size class
+    // explicitly (see `present(_:)`).
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.whiskrKitSheetPlacement) private var sheetPlacementOverride
+    @Environment(\.whiskrKitToastPlacement) private var toastPlacementOverride
+
     @State private var template: SurveyTemplate?
     @State private var presentsModal: Bool = false
     @State private var presentsToast: Bool = false
@@ -89,11 +96,16 @@ struct WhiskrKitSurveyModifier: ViewModifier {
 				guard let identifier else { return }
                 await checkEligibilityAndPresent(for: identifier)
             }
-            .onChange(of: WhiskrKit.shared.pendingSurveyId) { _, newId in
-                guard let newId else { return }
-                WhiskrKit.shared.pendingSurveyId = nil
+            .onChange(of: WhiskrKit.shared.pendingSurveyRequest) { _, newRequest in
+                guard let newRequest else { return }
+                WhiskrKit.shared.pendingSurveyRequest = nil
                 Task {
-                    await fetchSurvey(for: newId)
+                    switch newRequest.kind {
+                    case .fetch(let surveyId):
+                        await fetchSurvey(for: surveyId)
+                    case .present(let template):
+                        await present(template)
+                    }
                 }
             }
             .toast(
@@ -105,6 +117,7 @@ struct WhiskrKitSurveyModifier: ViewModifier {
                         nil
                     }
                 }(),
+                placement: resolvedToastPlacement,
                 openFollowUp: { identifier in
                     Task {
                         await fetchSurvey(for: identifier)
@@ -156,12 +169,41 @@ struct WhiskrKitSurveyModifier: ViewModifier {
             switch surveyTemplate.presentationBase {
             case .fullScreenForm:
                 presentsFullScreen = true
-            case .sheet:
-                presentsModal = true
+            case .sheet(let base):
+                presentSheet(base)
             case .toast:
                 presentsToast = true
             }
         }
+    }
+
+    /// Hosts a `sheet`-style survey. In compact width (iPhone, narrow Split View,
+    /// small Stage Manager windows) it stays the existing full-width bottom sheet.
+    /// In regular width it renders as a floating panel at the resolved placement,
+    /// hosted in WhiskrKit's own non-modal window.
+    @MainActor
+    private func presentSheet(_ base: SheetTemplate) {
+        guard horizontalSizeClass == .regular else {
+            presentsModal = true
+            return
+        }
+        SurveyPanelPresenter.shared.show(
+            template: base,
+            placement: resolvedSheetPlacement,
+            theme: WhiskrKit.shared.theme ?? .systemStyle
+        )
+    }
+
+    /// Resolution order: nearest `.whiskrKitSheetPlacement` override, then the
+    /// app-wide `defaultSheetPlacement`, which itself defaults to `.bottomCentered`.
+    private var resolvedSheetPlacement: SheetPlacement {
+        sheetPlacementOverride ?? WhiskrKit.shared.configuration.defaultSheetPlacement
+    }
+
+    /// Toast equivalent of `resolvedSheetPlacement`: nearest
+    /// `.whiskrKitToastPlacement` override, then the app-wide `defaultToastPlacement`.
+    private var resolvedToastPlacement: ToastPlacement {
+        toastPlacementOverride ?? WhiskrKit.shared.configuration.defaultToastPlacement
     }
 }
 
