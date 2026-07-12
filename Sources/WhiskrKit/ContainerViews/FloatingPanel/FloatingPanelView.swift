@@ -53,8 +53,13 @@ struct FloatingPanelView: View {
     /// Ensures the entrance slide-up runs once, on first appear.
     @State private var hasEntered = false
 
-    /// Height of the grabber row above the content (capsule + its padding).
+    /// Layout height reserved for the *visible* grabber row (capsule + its padding),
+    /// kept compact so the title and close button sit at their natural position.
     private static let grabberHeight: CGFloat = 21
+    /// Height of the *invisible* drag band at the top of the card. Larger than the
+    /// visible grabber and layered behind the content, so it enlarges the drag
+    /// target without reserving layout space or pushing the header down.
+    private static let dragHandleHeight: CGFloat = 48
     /// How far the card must be projected to drag-dismiss (folds in flick velocity).
     private static let dismissThreshold: CGFloat = 140
     /// A slow drag this far down dismisses even without a flick.
@@ -137,11 +142,20 @@ struct FloatingPanelView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: height)
+        .background(alignment: .top) {
+            Color.clear
+                .frame(height: Self.dragHandleHeight)
+                .contentShape(Rectangle())
+                .gesture(dragGesture(availableHeight: availableHeight))
+        }
         .modifier(PanelSurface())
         .accessibilityElement(children: .contain)
         .accessibilityAction(.escape) { performDismiss() }
     }
 
+    /// The visible grab handle , a small capsule with compact spacing so the title
+    /// and close button keep their natural position. The draggable *area* is
+    /// enlarged separately by the top drag band in `card(height:availableHeight:)`.
     private func grabber(availableHeight: CGFloat) -> some View {
         Capsule()
             .fill(.secondary)
