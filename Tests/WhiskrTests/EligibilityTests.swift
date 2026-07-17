@@ -18,6 +18,7 @@ final class MockEligibilityStorage: EligibilityStorage {
     var _installDate: Date
     var lastSurveyDate: Date?
     var completedSurveys: [String: Date] = [:]
+    var seenSurveys: [String: Date] = [:]
     private var _nextCheckAfter: [String: Date] = [:]
 
     var initializeCallCount = 0
@@ -49,6 +50,10 @@ final class MockEligibilityStorage: EligibilityStorage {
         completedSurveys.removeValue(forKey: surveyId)
     }
 
+    func removeSeenSurvey(_ surveyId: String) {
+        seenSurveys.removeValue(forKey: surveyId)
+    }
+
     func incrementSessionCount() {
         incrementCallCount += 1
         _sessionCount += 1
@@ -65,6 +70,7 @@ final class MockEligibilityNetworkService: NetworkService {
     var eligibilityResult: Result<SurveyEligibilityResponse, Error>?
     var eligibilityCallCount = 0
     var lastSurveyIdChecked: String?
+    var lastContextSent: SurveyEligibilityContext?
     /// Optional delay in nanoseconds added before returning, useful for concurrency tests.
     var delayNanoseconds: UInt64 = 0
 
@@ -78,6 +84,7 @@ final class MockEligibilityNetworkService: NetworkService {
     ) async throws -> SurveyEligibilityResponse {
         eligibilityCallCount += 1
         lastSurveyIdChecked = surveyId
+        lastContextSent = context
 
         if delayNanoseconds > 0 {
             try await Task.sleep(nanoseconds: delayNanoseconds)
@@ -349,7 +356,8 @@ struct SurveyEligibilityContextTests {
             sessionCount: 3,
             installDate: installDate,
             lastSurveyDate: nil,
-            completedSurveys: [:]
+            completedSurveys: [:],
+            seenSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -364,6 +372,39 @@ struct SurveyEligibilityContextTests {
         #expect(json["installDate"] as? String != nil)
         #expect(json["lastSurveyDate"] == nil)
         #expect(json["completedSurveys"] as? [String: String] == [:])
+        #expect(json["seenSurveys"] as? [String: String] == [:])
+    }
+
+    /// Pins the wire contract. The Android SDK must emit exactly these keys, so a
+    /// new one may not be added here without adding it there.
+    @Test("The eligibility body carries exactly the agreed keys")
+    func bodyCarriesExactlyTheAgreedKeys() throws {
+        let context = SurveyEligibilityContext(
+            deviceId: "test-device-id",
+            appVersion: "1.0.0",
+            locale: "en-US",
+            sessionCount: 3,
+            installDate: Date(timeIntervalSince1970: 1_700_000_000),
+            lastSurveyDate: Date(timeIntervalSince1970: 1_705_000_000),
+            completedSurveys: ["checkout-feedback": Date(timeIntervalSince1970: 1_704_000_000)],
+            seenSurveys: ["your-journey-stats": Date(timeIntervalSince1970: 1_706_000_000)]
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(context)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        #expect(Set(json.keys) == [
+            "deviceId",
+            "appVersion",
+            "locale",
+            "sessionCount",
+            "installDate",
+            "lastSurveyDate",
+            "completedSurveys",
+            "seenSurveys"
+        ])
     }
 
     @Test("SurveyEligibilityContext encodes lastSurveyDate when present")
@@ -375,7 +416,8 @@ struct SurveyEligibilityContextTests {
             sessionCount: 1,
             installDate: Date(),
             lastSurveyDate: Date(timeIntervalSince1970: 1_710_000_000),
-            completedSurveys: [:]
+            completedSurveys: [:],
+            seenSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -395,7 +437,8 @@ struct SurveyEligibilityContextTests {
             sessionCount: 7,
             installDate: Date(timeIntervalSince1970: 1_700_000_000),
             lastSurveyDate: Date(timeIntervalSince1970: 1_705_000_000),
-            completedSurveys: ["checkout-feedback": Date(timeIntervalSince1970: 1_704_000_000)]
+            completedSurveys: ["checkout-feedback": Date(timeIntervalSince1970: 1_704_000_000)],
+            seenSurveys: ["onboarding-nps": Date(timeIntervalSince1970: 1_706_000_000)]
         )
 
         let encoder = JSONEncoder()
@@ -414,6 +457,8 @@ struct SurveyEligibilityContextTests {
         #expect(abs(decoded.lastSurveyDate!.timeIntervalSince(original.lastSurveyDate!)) < 1)
         #expect(decoded.completedSurveys.count == 1)
         #expect(abs(decoded.completedSurveys["checkout-feedback"]!.timeIntervalSince(original.completedSurveys["checkout-feedback"]!)) < 1)
+        #expect(decoded.seenSurveys.count == 1)
+        #expect(abs(decoded.seenSurveys["onboarding-nps"]!.timeIntervalSince(original.seenSurveys["onboarding-nps"]!)) < 1)
     }
 }
 
@@ -581,7 +626,8 @@ struct CompletedSurveysContextEncodingTests {
             completedSurveys: [
                 "checkout-feedback": Date(timeIntervalSince1970: 1_705_000_000),
                 "onboarding-nps": Date(timeIntervalSince1970: 1_710_000_000)
-            ]
+            ],
+            seenSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -605,7 +651,8 @@ struct CompletedSurveysContextEncodingTests {
             sessionCount: 1,
             installDate: Date(timeIntervalSince1970: 1_700_000_000),
             lastSurveyDate: nil,
-            completedSurveys: [:]
+            completedSurveys: [:],
+            seenSurveys: [:]
         )
 
         let encoder = JSONEncoder()
@@ -615,6 +662,8 @@ struct CompletedSurveysContextEncodingTests {
 
         let completedSurveys = json["completedSurveys"] as? [String: String]
         #expect(completedSurveys == [:])
+        let seenSurveys = json["seenSurveys"] as? [String: String]
+        #expect(seenSurveys == [:])
     }
 }
 
@@ -632,6 +681,37 @@ struct RemoveFromHistoryServiceTests {
         return (service, network, storage)
     }
 
+    /// The regression this whole mechanism exists for: a dismissal writes only a
+    /// `seen` record, so unless that reaches the server the repeat policy is
+    /// never consulted and a dismissed survey is granted again forever.
+    @Test("seenSurveys reaches the server in the eligibility context")
+    func seenSurveysIsSentInContext() async {
+        let (sut, network, storage) = makeSUT()
+        let seenDate = Date(timeIntervalSince1970: 1_705_000_000)
+        storage.seenSurveys["your-journey-stats"] = seenDate
+
+        network.eligibilityResult = .success(
+            SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: false)
+        )
+
+        _ = await sut.checkEligibility(for: "your-journey-stats")
+
+        #expect(network.lastContextSent?.seenSurveys["your-journey-stats"] == seenDate)
+    }
+
+    @Test("An untouched survey sends an empty seenSurveys rather than omitting it")
+    func emptySeenSurveysIsStillSent() async {
+        let (sut, network, _) = makeSUT()
+
+        network.eligibilityResult = .success(
+            SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: false)
+        )
+
+        _ = await sut.checkEligibility(for: "your-journey-stats")
+
+        #expect(network.lastContextSent?.seenSurveys == [:])
+    }
+
     @Test("When removeFromHistory is true, surveyId is removed from completedSurveys")
     func removeFromHistoryRemovesSurvey() async {
         let (sut, network, storage) = makeSUT()
@@ -643,6 +723,32 @@ struct RemoveFromHistoryServiceTests {
         _ = await sut.checkEligibility(for: "checkout-feedback")
 
         #expect(storage.completedSurveys["checkout-feedback"] == nil)
+    }
+
+    @Test("When removeFromHistory is true, surveyId is removed from seenSurveys")
+    func removeFromHistoryRemovesSeenSurvey() async {
+        let (sut, network, storage) = makeSUT()
+        storage.seenSurveys["checkout-feedback"] = Date()
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: true)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.seenSurveys["checkout-feedback"] == nil)
+    }
+
+    @Test("When removeFromHistory is false, seenSurveys is unchanged")
+    func removeFromHistoryFalseKeepsSeenSurvey() async {
+        let (sut, network, storage) = makeSUT()
+        storage.seenSurveys["checkout-feedback"] = Date()
+
+        let response = SurveyEligibilityResponse(shouldShow: false, survey: nil, nextCheckAfter: nil, removeFromHistory: false)
+        network.eligibilityResult = .success(response)
+
+        _ = await sut.checkEligibility(for: "checkout-feedback")
+
+        #expect(storage.seenSurveys["checkout-feedback"] != nil)
     }
 
     @Test("When removeFromHistory is true, nextCheckAfter for that survey is also removed")

@@ -59,9 +59,11 @@ final class WhiskrKitEligibilityService: EligibilityService {
             // 6. Persist nextCheckAfter hint
             storage.setNextCheckAfter(response.nextCheckAfter, for: surveyId)
 
-            // 6b. Handle removeFromHistory
+            // 6b. removeFromHistory means forget the survey entirely:
+            // completion, seen, and cache.
             if response.removeFromHistory == true {
                 storage.removeCompletedSurvey(surveyId)
+                storage.removeSeenSurvey(surveyId)
                 storage.setNextCheckAfter(nil, for: surveyId)
             }
 
@@ -91,7 +93,8 @@ final class WhiskrKitEligibilityService: EligibilityService {
             sessionCount: storage.sessionCount,
             installDate: storage.installDate,
             lastSurveyDate: storage.lastSurveyDate,
-            completedSurveys: storage.completedSurveys
+            completedSurveys: storage.completedSurveys,
+            seenSurveys: storage.seenSurveys
         )
     }
 }

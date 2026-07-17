@@ -19,8 +19,11 @@ struct ToastView: View {
     @Binding var isVisible: Bool
     let template: ToastTemplate
     var openFollowUp: (String) -> Void
-    
+
     @State private var surveyResponse: SurveyResponse
+    /// Set on submit and on opening the follow-up, so the shared teardown
+    /// doesn't report either as a dismissal.
+    @State private var didInteract = false
 
     private var canSubmit: Bool {
         guard let survey = template.survey, survey.surveyBase.isRequired else { return true }
@@ -96,6 +99,7 @@ struct ToastView: View {
                 }
         )
         .transition(.move(edge: .bottom).combined(with: .opacity))
+        .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
     }
 
     var titleAndDescription: some View {
@@ -139,6 +143,7 @@ struct ToastView: View {
             HStack {
                 Button {
                     guard let followUpIdentifier = template.followUpIdentifier else { return }
+                    didInteract = true
                     openFollowUp(followUpIdentifier)
                 } label: {
                     Text(.giveFeedbackButtonLabel)
@@ -168,6 +173,7 @@ struct ToastView: View {
     private func submitSurvey() {
         if canSubmit {
             Logger.wkUI.info("ℹ️ User submitted survey in toast.")
+            didInteract = true
             Task {
                 await WhiskrKit.shared.submitSurveyResponse(
                     surveyId: template.id,

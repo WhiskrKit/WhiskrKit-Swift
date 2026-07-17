@@ -22,6 +22,10 @@ final class MockConfigurationService: ConfigurationService {
         return true
     }
 
+    func recordImpression(surveyId: String, event: SurveyImpressionEvent, trigger: SurveyImpressionTrigger) async {
+        Logger.wkNetworking.info("👁️ Mocked '\(event.rawValue)' (\(trigger.rawValue)) impression for survey '\(surveyId)'")
+    }
+
     let networkService: NetworkService
 
     private var templates: [String: SurveyTemplate] = [:]

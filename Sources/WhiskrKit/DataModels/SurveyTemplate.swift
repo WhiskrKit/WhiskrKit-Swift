@@ -10,7 +10,16 @@ import Foundation
 
 struct SurveyTemplate: Decodable {
     let presentationBase: PresentationBase
-    
+
+    /// The presentation template's outer id.
+    var id: String {
+        switch presentationBase {
+        case .fullScreenForm(let base): return base.id
+        case .sheet(let base): return base.id
+        case .toast(let base): return base.id
+        }
+    }
+
     enum PresentationType: String, Decodable {
         case fullScreenForm
         case sheet
