@@ -1,6 +1,6 @@
 ![WhiskrKit logo](https://whiskrkit.eu/WhiskrKit_logo.png)
 
-![version](https://img.shields.io/badge/version-0.1.9-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
+![version](https://img.shields.io/badge/version-0.1.10-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) 
 
 # WhiskrKit for iOS (Swift) - The purr-fect feedback toolkit for modern apps.
 
