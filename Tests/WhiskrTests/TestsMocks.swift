@@ -16,11 +16,30 @@ final class MockNetworkService: NetworkService {
     var fetchCallCount = 0
     var delaySeconds: TimeInterval = 0
     var lastIdempotencyKey: String?
-    
+    var impressionCallCount = 0
+    var lastImpressionEvent: SurveyImpressionEvent?
+    var lastImpressionTrigger: SurveyImpressionTrigger?
+    var lastImpressionSurveyId: String?
+
     init() {
         super.init(baseURL: URL(string: "https://test.example.com")!)
     }
-    
+
+    override func recordImpression(
+        surveyId: String,
+        event: SurveyImpressionEvent,
+        trigger: SurveyImpressionTrigger
+    ) async throws {
+        impressionCallCount += 1
+        lastImpressionSurveyId = surveyId
+        lastImpressionEvent = event
+        lastImpressionTrigger = trigger
+
+        if shouldFail {
+            throw WhiskrKitError.networkError(NSError(domain: "test", code: -1))
+        }
+    }
+
     override func submitRating(
         surveyId: String,
         identifier: String,

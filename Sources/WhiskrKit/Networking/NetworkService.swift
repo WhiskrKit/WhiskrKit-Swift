@@ -71,6 +71,29 @@ class NetworkService {
         return try await performPostRequestWithResponse(request, type: SurveyEligibilityResponse.self)
     }
 
+    /// Reports that a survey went on screen, or left it without a submission.
+    func recordImpression(
+        surveyId: String,
+        event: SurveyImpressionEvent,
+        trigger: SurveyImpressionTrigger
+    ) async throws {
+        guard let apiKey = apiKey else {
+            throw WhiskrKitError.notInitialized
+        }
+
+        let url = baseURL.appendingPathComponent("api/v1/survey/\(surveyId)/impression")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = requestTimeout
+
+        addCommonHeaders(to: &request, apiKey: apiKey)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        request.httpBody = try JSONEncoder().encode(SurveyImpressionRequest(event: event, trigger: trigger))
+
+        try await performPostRequest(request)
+    }
+
     func submitRating(
         surveyId: String,
         identifier: String,

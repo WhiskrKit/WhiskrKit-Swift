@@ -15,6 +15,7 @@ protocol ConfigurationService {
     func fetchSurveyTemplate<T>(for identifier: String) async throws -> T? where T: Decodable
     @discardableResult
     func submitSurveyResponse(surveyId: String, response: SurveyResponse) async -> Bool
+    func recordImpression(surveyId: String, event: SurveyImpressionEvent, trigger: SurveyImpressionTrigger) async
     func retryPendingSubmissions() async
     func configure(apiKey: String)
 }
@@ -58,6 +59,16 @@ final class WhiskrKitConfigurationService: ConfigurationService {
 			Logger.wkNetworking.warning("❌Fetching survey failed: \(error)")
 			return nil
 		}
+    }
+
+    /// Fire-and-forget analytics: failures are logged and dropped, never queued.
+    func recordImpression(surveyId: String, event: SurveyImpressionEvent, trigger: SurveyImpressionTrigger) async {
+        do {
+            try await networkService.recordImpression(surveyId: surveyId, event: event, trigger: trigger)
+            Logger.wkNetworking.info("👁️ Reported '\(event.rawValue)' (\(trigger.rawValue)) impression for survey '\(surveyId)'")
+        } catch {
+            Logger.wkNetworking.warning("⚠️ Impression report failed for '\(surveyId)': \(error). Ignoring.")
+        }
     }
 
     @discardableResult

@@ -19,6 +19,8 @@ struct FullScreenContainerView: View {
     
     @State private var surveyResponse: SurveyResponse
 	@State private var keyboardVisible = false
+    /// Set on submit so the shared teardown doesn't report a dismissal.
+    @State private var didInteract = false
 
     init(template: FullScreenFormTemplate) {
         self.template = template
@@ -100,6 +102,7 @@ struct FullScreenContainerView: View {
 				)
 			) { keyboardVisible = $0 }
         }
+        .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
 	}
 
     private var submitButton: some View {
@@ -121,6 +124,7 @@ struct FullScreenContainerView: View {
     private func submitSurvey() {
         if canSubmit {
             Logger.wkUI.info("ℹ️ User submitted fullscreen survey.")
+            didInteract = true
             Task {
                 await WhiskrKit.shared.submitSurveyResponse(
                     surveyId: template.id,

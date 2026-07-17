@@ -16,4 +16,6 @@ struct SurveyEligibilityContext: Codable {
     let installDate: Date
     let lastSurveyDate: Date?
     let completedSurveys: [String: Date]
+    /// Surveys put on screen, whatever the outcome.
+    let seenSurveys: [String: Date]
 }

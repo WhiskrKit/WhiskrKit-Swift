@@ -23,6 +23,13 @@ public class WhiskrKit {
     private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
     private var eligibilityService: EligibilityService?
 
+    /// In mock mode, no eligibility state is written and no impressions are sent.
+    private var usesMockedSurveys = false
+
+    /// Survey ids granted by an eligibility check but not yet rendered;
+    /// consumed to decide the impression trigger.
+    private var pendingTargetedGrants: Set<String> = []
+
 	var pendingSurveyRequest: PendingSurveyRequest? = nil
 
     private init() {
@@ -41,6 +48,8 @@ public class WhiskrKit {
 	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool = false) {
         self.apiKey = apiKey
 		configurationService.configure(apiKey: apiKey)
+
+		usesMockedSurveys = mockedSurveys
 
 		if mockedSurveys {
 			let mockService = MockConfigurationService()
@@ -202,7 +211,11 @@ public class WhiskrKit {
             return nil
         }
 
-        return await eligibilityService?.checkEligibility(for: surveyId)
+        let template = await eligibilityService?.checkEligibility(for: surveyId)
+        if let template {
+            pendingTargetedGrants.insert(template.id)
+        }
+        return template
     }
 
     internal func fetchSurveyTemplate<T>(for identifier: String) async -> T? where T: Decodable {
@@ -231,5 +244,35 @@ public class WhiskrKit {
         eligibilityStorage.completedSurveys = completed
         eligibilityStorage.setNextCheckAfter(nil, for: surveyId)
         Logger.wkCore.info("📋 Tracked completion for survey '\(surveyId)'")
+    }
+
+    /// Records that a survey went on screen; reported as `seenSurveys` in the
+    /// eligibility context. Written for every presentation, `present(surveyId:)`
+    /// included.
+    internal func trackSurveySeen(surveyId: String) {
+        guard !usesMockedSurveys else { return }
+        guard apiKey != nil else {
+            Logger.wkCore.error("WhiskrKit is not initialized with an API key. Call initialize(apiKey:) first.")
+            return
+        }
+
+        var seen = eligibilityStorage.seenSurveys
+        seen[surveyId] = Date()
+        eligibilityStorage.seenSurveys = seen
+        Logger.wkCore.info("👁️ Tracked impression for survey '\(surveyId)'")
+    }
+
+    /// Resolves how the survey now on screen got there, consuming the grant marker.
+    internal func consumeImpressionTrigger(for surveyId: String) -> SurveyImpressionTrigger {
+        pendingTargetedGrants.remove(surveyId) != nil ? .targeted : .manual
+    }
+
+    /// Fire-and-forget: never blocks presentation or submission.
+    internal func recordImpression(surveyId: String, event: SurveyImpressionEvent, trigger: SurveyImpressionTrigger) {
+        guard !usesMockedSurveys, apiKey != nil else { return }
+
+        Task { [configurationService] in
+            await configurationService.recordImpression(surveyId: surveyId, event: event, trigger: trigger)
+        }
     }
 }

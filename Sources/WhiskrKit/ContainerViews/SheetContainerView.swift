@@ -18,6 +18,8 @@ struct SheetContainerView: View {
     let template: SheetTemplate
 
     @State private var surveyResponse: SurveyResponse
+    /// Set on submit so the shared teardown doesn't report a dismissal.
+    @State private var didInteract = false
 
     init(template: SheetTemplate) {
         self.template = template
@@ -76,6 +78,7 @@ struct SheetContainerView: View {
 			try? await Task.sleep(for: .milliseconds(100))
 			isFocused = true
 		}
+        .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
     }
 
     private var submitButton: some View {
@@ -126,6 +129,7 @@ struct SheetContainerView: View {
     private func submitSurvey() {
         if canSubmit {
             Logger.wkUI.info("ℹ️ User submitted sheet survey.")
+            didInteract = true
             Task {
                 await WhiskrKit.shared.submitSurveyResponse(
                     surveyId: template.id,
