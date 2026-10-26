@@ -30,6 +30,19 @@ contact us directly via the dashboard (once available) or via mail.
 * **Accessibility First**: Full VoiceOver and Dynamic Type support
 * **Haptic Feedback**: Enhanced user experience
 
+## Playground app
+
+To see WhiskrKit before integrating it, open 
+`Examples/WhiskrKitPlayground/WhiskrKitPlayground.xcodeproj` and run it. The app 
+builds against the local package, so it always shows the current SDK code. It uses 
+mocked surveys, so no API key or backend is needed and nothing is sent anywhere.
+
+On one screen you can:
+
+* Present every question type and presentation style.
+* Pick a preset or change individual theme colors, then present a survey to see the result.
+* Copy the `setTheme` code that matches your choices.
+
 ## Quick Start
 
 ### Initialization and theming
