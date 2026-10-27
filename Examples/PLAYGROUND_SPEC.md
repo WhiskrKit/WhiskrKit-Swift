@@ -30,10 +30,8 @@ and an in-app preview of survey components. The real survey is the preview.
 - It **must** depend on the SDK through a local path reference to the repo's own
   source, not a published version, so it always builds against the current code.
 - It **must** initialize WhiskrKit with mocked surveys. See section 5.
-- CI **should** build the sample so it can't drift from the SDK. iOS: not added yet;
-  the planned job runs `xcodebuild build -project
-  Examples/WhiskrKitPlayground/WhiskrKitPlayground.xcodeproj -scheme
-  WhiskrKitPlayground -destination 'generic/platform=iOS Simulator'`.
+- CI **should** build the sample so it can't drift from the SDK. iOS: the
+  `playground` job in `.github/workflows/ci.yml`.
 
 iOS specifics, for reference:
 
