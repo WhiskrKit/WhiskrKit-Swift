@@ -36,6 +36,23 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
+  playground:
+    name: Build Playground example
+    runs-on: macos-26
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project Examples/WhiskrKitPlayground/WhiskrKitPlayground.xcodeproj \
+            -scheme WhiskrKitPlayground \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
+
   test:
     name: Test
     runs-on: macos-26

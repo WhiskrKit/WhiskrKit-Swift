@@ -47,15 +47,18 @@ public class WhiskrKit {
 	///   - withMockedSurveys: A boolean indicating whether to use mocked survey data for testing purposes. Its default is set to false.
 	public func initialize(apiKey: String, withMockedSurveys mockedSurveys: Bool = false) {
         self.apiKey = apiKey
-		configurationService.configure(apiKey: apiKey)
-
 		usesMockedSurveys = mockedSurveys
 
 		if mockedSurveys {
+			// Swap in the mock before configuring: configuring the real service
+			// retries queued submissions against the production backend.
 			let mockService = MockConfigurationService()
 			configurationService = mockService
+			configurationService.configure(apiKey: apiKey)
 			eligibilityService = MockEligibilityService(configurationService: mockService)
 		} else {
+			configurationService.configure(apiKey: apiKey)
+
 			// Eligibility context tracking
 			eligibilityStorage.initializeIfNeeded()
 			eligibilityStorage.incrementSessionCount()
@@ -239,6 +242,8 @@ public class WhiskrKit {
     }
 
     private func trackSurveyCompletion(surveyId: String) {
+        guard !usesMockedSurveys else { return }
+
         var completed = eligibilityStorage.completedSurveys
         completed[surveyId] = Date()
         eligibilityStorage.completedSurveys = completed
