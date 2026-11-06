@@ -37,46 +37,49 @@
         }
       }
     },
+    "accessibility_option_deselected_announcement" : {
+      "comment" : "VoiceOver announcement after deselecting a multiple choice option; %@ is the option label",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, not selected"
+          }
+        }
+      }
+    },
+    "accessibility_option_selected_announcement" : {
+      "comment" : "VoiceOver announcement after selecting a multiple choice option; %@ is the option label",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, selected"
+          }
+        }
+      }
+    },
     "accessibility_score_label" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Score %lld "
+            "value" : "Score %lld"
           }
         }
       }
     },
     "accessibility_symbol_rating_label" : {
+      "comment" : "VoiceOver label for the star rating control",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ rating"
-          }
-        }
-      }
-    },
-    "accessibility_symbol_star_label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Star %1$lld"
-          }
-        }
-      }
-    },
-    "accessibility_tap_to_select_symbol_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to select rating from %1lld to %2lld %@"
+            "value" : "Star rating"
           }
         }
       }
@@ -109,24 +112,44 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1lld out of %2lld"
+            "value" : "%1$lld out of %2$lld"
           }
         }
       }
     },
     "accessibility_x_out_of_y_symbol_label" : {
+      "comment" : "VoiceOver value of the star rating, e.g. \"3 out of 5 stars\"",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1lld out of %2lld %@"
+            "value" : "%1$lld out of %#@stars@"
+          },
+          "substitutions" : {
+            "stars" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg star"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg stars"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
-    },
-    "checked" : {
-
     },
     "close_button_label" : {
       "extractionState" : "manual",
@@ -150,9 +173,6 @@
         }
       }
     },
-    "Double tap to select" : {
-
-    },
     "form_required_multipleChoice_message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -170,18 +190,41 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please select a number between %1lld and%2lld."
+            "value" : "Please select a number between %1$lld and %2$lld."
           }
         }
       }
     },
     "form_required_symbolRating_message" : {
+      "comment" : "Shown when a required star rating is left empty, e.g. \"Please select between 1 and 5 stars\"",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please select between %1lld and %2lld %@  "
+            "value" : "Please select between %1$lld and %#@stars@"
+          },
+          "substitutions" : {
+            "stars" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg star"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg stars"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -280,9 +323,6 @@
           }
         }
       }
-    },
-    "unchecked" : {
-
     }
   },
   "version" : "1.1"
