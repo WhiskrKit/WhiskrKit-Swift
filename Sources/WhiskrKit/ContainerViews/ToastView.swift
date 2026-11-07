@@ -100,6 +100,7 @@ struct ToastView: View {
         )
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
+        .surveyLanguage(template.language)
     }
 
     var titleAndDescription: some View {

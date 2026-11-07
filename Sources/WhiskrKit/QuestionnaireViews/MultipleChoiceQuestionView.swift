@@ -68,6 +68,7 @@ struct MultipleChoiceQuestionView: View {
 }
 
 struct SingleChoiceView: View {
+	@Environment(\.locale) private var locale
 	let options: [MultipleChoiceOption]
 	@Binding var selectedOption: String?
 
@@ -82,7 +83,11 @@ struct SingleChoiceView: View {
 						selectedOption = selectedOption == option.id ? nil : option.id
 						UIAccessibility.post(
 							notification: .announcement,
-							argument: selectedOption == option.id ? "\(option.label), selected" : "\(option.label), deselected"
+							argument: (
+								selectedOption == option.id
+								? LocalizedStringResource.accessibilityOptionSelectedAnnouncement(option.label)
+								: .accessibilityOptionDeselectedAnnouncement(option.label)
+							).resolved(in: locale)
 						)
 					}
 				)
@@ -92,6 +97,7 @@ struct SingleChoiceView: View {
 }
 
 struct MultipleChoiceView: View {
+	@Environment(\.locale) private var locale
 	let options: [MultipleChoiceOption]
 	@Binding var selectedOptions: [String]
 
@@ -105,14 +111,19 @@ struct MultipleChoiceView: View {
 					onTap: {
 						if selectedOptions.contains(option.id) {
 							selectedOptions = selectedOptions.filter { $0 != option.id }
-							UIAccessibility.post(notification: .announcement, argument: "\(option.label), unchecked")
+							UIAccessibility.post(
+								notification: .announcement,
+								argument: LocalizedStringResource.accessibilityOptionDeselectedAnnouncement(option.label).resolved(in: locale)
+							)
 						} else {
 							selectedOptions.append(option.id)
-							UIAccessibility.post(notification: .announcement, argument: "\(option.label), checked")
+							UIAccessibility.post(
+								notification: .announcement,
+								argument: LocalizedStringResource.accessibilityOptionSelectedAnnouncement(option.label).resolved(in: locale)
+							)
 						}
 					}
 				)
-				.accessibilityValue(selectedOptions.contains(option.id) ? "checked" : "unchecked")
 			}
 		}
 	}
@@ -154,7 +165,6 @@ struct ChoiceView: View {
 		.accessibilityElement(children: .ignore)
 		.accessibilityLabel(label)
 		.accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
-		.accessibilityHint("Double tap to select")
 		.onTapGesture {
 			UIImpactFeedbackGenerator(style: .light).impactOccurred()
 			onTap()

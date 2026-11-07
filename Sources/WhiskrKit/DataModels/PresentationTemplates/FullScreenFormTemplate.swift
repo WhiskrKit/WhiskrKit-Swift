@@ -14,4 +14,6 @@ struct FullScreenFormTemplate: Decodable {
     let subtitle: String?
     let description: String?
     let surveys: [SurveyPresentation]
+    /// Language the server served this survey in (e.g. "nl"); WhiskrKit's own strings follow it.
+    var language: String? = nil
 }

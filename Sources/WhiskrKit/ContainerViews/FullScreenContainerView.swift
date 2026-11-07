@@ -87,7 +87,7 @@ struct FullScreenContainerView: View {
             .background(
                 WhiskrKitTheme.container?.fullScreen?.backgroundColor.ignoresSafeArea()
             )
-            .navigationTitle(template.title ?? "Survey") // localize survey
+            .navigationTitle(template.title.map { Text($0) } ?? Text(.surveyTitleFallback))
             .navigationSubtitleIfAvailable(template.subtitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -103,6 +103,7 @@ struct FullScreenContainerView: View {
 			) { keyboardVisible = $0 }
         }
         .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
+        .surveyLanguage(template.language)
 	}
 
     private var submitButton: some View {

@@ -14,4 +14,6 @@ struct SheetTemplate: Decodable {
     let description: String?
     let followUpQuestion: String?
     let survey: SurveyPresentation
+    /// Language the server served this survey in (e.g. "nl"); WhiskrKit's own strings follow it.
+    var language: String? = nil
 }

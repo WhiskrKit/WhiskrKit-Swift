@@ -38,22 +38,26 @@ struct SymbolRatingView: View {
                                 .scaleEffect(star <= rating ? 1.1 : 1.0)
                                 .animation(.easeInOut(duration: 0.1), value: rating)
                         }
-                        .accessibilityLabel(.accessibilitySymbolStarLabel(1))
-                        .accessibilityHint(
-                            star <= rating 
-                            ? .accessibilityLabelSelected
-                            : .accessibilityLabelNotSelected
-                        )
-                        .accessibilityValue(.accessibilityXOutOfYSymbolLabel(star, 5, "stars"))
-                        .accessibilityAddTraits(star <= rating ? [.isSelected] : [])
                         if star < 5 {
                             Spacer()
                         }
                     }
                 }
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(.accessibilitySymbolRatingLabel("Star"))
-				.accessibilityHint(.accessibilityTapToSelectSymbolHint(1, 5, "stars"))
+                // One adjustable element: VoiceOver users swipe up/down to change the rating
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(.accessibilitySymbolRatingLabel)
+                .accessibilityValue(
+                    rating == 0
+                    ? .accessibilityLabelNotSelected
+                    : .accessibilityXOutOfYSymbolLabel(rating, stars: 5)
+                )
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: rating = min(rating + 1, 5)
+                    case .decrement: rating = max(rating - 1, 1)
+                    @unknown default: break
+                    }
+                }
                     .onChange(of: rating) { _, newValue in
                         surveyResponse.results[template.id] = .symbolRating(newValue)
                     }
@@ -66,7 +70,7 @@ struct SymbolRatingView: View {
     
     @ViewBuilder
     var formRequiredMessage: some View {
-        Label(.formRequiredSymbolRatingMessage(1, 5, "stars"), systemImage: "exclamationmark.circle.fill")
+        Label(.formRequiredSymbolRatingMessage(1, stars: 5), systemImage: "exclamationmark.circle.fill")
             .font(.footnote)
             .foregroundStyle(.red)
             .italic()
