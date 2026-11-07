@@ -13,10 +13,10 @@ enum ThumbsRating: String, CaseIterable, Codable {
     case thumbsDown
     case none
     
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
-        case .thumbsUp: return String(localized: .ratingButtonThumbsUp)
-        case .thumbsDown: return String(localized: .ratingButtonThumbsDown)
+        case .thumbsUp: return .ratingButtonThumbsUp
+        case .thumbsDown: return .ratingButtonThumbsDown
         case .none: return ""
         }
     }

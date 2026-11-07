@@ -28,6 +28,9 @@ struct SnapshotTests {
 
     // MARK: - Helpers
 
+    /// Goldens are English; pin the locale so a simulator in another language renders the same.
+    private static let locale = Locale(identifier: "en")
+
     private func snap(
         _ view: some View,
         width: CGFloat = 390,
@@ -44,6 +47,7 @@ struct SnapshotTests {
     ) {
         let wrapped = view
             .environment(\.WhiskrKitTheme, .systemStyle)
+            .environment(\.locale, Self.locale)
             .environment(alert)
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -292,6 +296,7 @@ struct SnapshotTests {
             previewContentHeight: contentHeight
         )
         .environment(\.WhiskrKitTheme, .systemStyle)
+        .environment(\.locale, Self.locale)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
 
