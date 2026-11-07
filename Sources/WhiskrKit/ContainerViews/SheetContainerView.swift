@@ -79,6 +79,7 @@ struct SheetContainerView: View {
 			isFocused = true
 		}
         .whiskrKitImpressions(surveyId: template.id, didInteract: $didInteract)
+        .surveyLanguage(template.language)
     }
 
     private var submitButton: some View {

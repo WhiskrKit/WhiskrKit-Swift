@@ -68,6 +68,7 @@ struct MultipleChoiceQuestionView: View {
 }
 
 struct SingleChoiceView: View {
+	@Environment(\.locale) private var locale
 	let options: [MultipleChoiceOption]
 	@Binding var selectedOption: String?
 
@@ -82,11 +83,11 @@ struct SingleChoiceView: View {
 						selectedOption = selectedOption == option.id ? nil : option.id
 						UIAccessibility.post(
 							notification: .announcement,
-							argument: String(
-								localized: selectedOption == option.id
-								? .accessibilityOptionSelectedAnnouncement(option.label)
+							argument: (
+								selectedOption == option.id
+								? LocalizedStringResource.accessibilityOptionSelectedAnnouncement(option.label)
 								: .accessibilityOptionDeselectedAnnouncement(option.label)
-							)
+							).resolved(in: locale)
 						)
 					}
 				)
@@ -96,6 +97,7 @@ struct SingleChoiceView: View {
 }
 
 struct MultipleChoiceView: View {
+	@Environment(\.locale) private var locale
 	let options: [MultipleChoiceOption]
 	@Binding var selectedOptions: [String]
 
@@ -111,13 +113,13 @@ struct MultipleChoiceView: View {
 							selectedOptions = selectedOptions.filter { $0 != option.id }
 							UIAccessibility.post(
 								notification: .announcement,
-								argument: String(localized: .accessibilityOptionDeselectedAnnouncement(option.label))
+								argument: LocalizedStringResource.accessibilityOptionDeselectedAnnouncement(option.label).resolved(in: locale)
 							)
 						} else {
 							selectedOptions.append(option.id)
 							UIAccessibility.post(
 								notification: .announcement,
-								argument: String(localized: .accessibilityOptionSelectedAnnouncement(option.label))
+								argument: LocalizedStringResource.accessibilityOptionSelectedAnnouncement(option.label).resolved(in: locale)
 							)
 						}
 					}
