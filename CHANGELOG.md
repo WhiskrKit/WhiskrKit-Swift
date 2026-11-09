@@ -9,6 +9,9 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 ## Unreleased
 
 ### Added
+- Global survey attributes: `setAttribute`, `setAttributes`, `removeAttribute` and
+  `clearAttributes` attach string, number or bool values to every survey
+  response submitted afterwards. Personal data is dropped by the server.
 - Translations of all built-in strings and VoiceOver labels into Dutch, German,
   French, Spanish, Italian, Portuguese (Brazil), Japanese, Korean and
   Simplified Chinese.

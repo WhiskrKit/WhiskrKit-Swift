@@ -180,6 +180,38 @@ func userNotificationCenter(
 > **Note:** If `present(surveyId:)` is called but no view with `.whiskrKit()` is 
 > active in the hierarchy, the call is a no-op and no survey will appear.
 
+## Attributes
+
+Attach context about the current user or session to survey responses, so you can
+filter results later (for example by plan or app version). Attributes are global,
+held in memory only and sent with every response you submit after setting them,
+so set them again on each launch.
+
+```swift
+WhiskrKit.shared.setAttribute("plan", "pro")
+WhiskrKit.shared.setAttribute("sessions", 3)
+WhiskrKit.shared.setAttribute("beta", true)
+
+WhiskrKit.shared.setAttributes(["tier": "gold", "onboarded": true]) // merges
+WhiskrKit.shared.setAttribute("plan", nil)                           // removes one
+WhiskrKit.shared.removeAttribute("tier")
+WhiskrKit.shared.clearAttributes()
+```
+
+Values are strings, numbers or bools. The value that is current at the moment the
+response is submitted is the one that is sent, and a response that is queued for
+retry keeps the attributes it was submitted with.
+
+Limits: at most 20 attributes, keys of 1 to 64 characters, string values of up to
+256 characters, and 2 KB in total. The SDK trims to these limits before sending.
+
+> **Do not send personal data.** Emails, phone numbers, names, IBANs and card
+> numbers must not be used as attribute keys or values. The server drops
+> attributes that look like personal data (for example keys such as `email`,
+> `phone`, `name` or `address`, or values that are an email, IBAN, card number
+> or phone number). In debug builds the SDK logs a warning when an attribute
+> looks like personal data, but it never changes what you set.
+
 ## Using WhiskrKit in UIKit apps
 
 Not a SwiftUI app? No problem. WhiskrKit works just as well in classic UIKit apps, 

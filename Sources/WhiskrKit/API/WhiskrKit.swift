@@ -32,8 +32,19 @@ public class WhiskrKit {
 
 	var pendingSurveyRequest: PendingSurveyRequest? = nil
 
+    /// Global attributes attached to survey responses at submit time. Memory only.
+    @ObservationIgnored
+    var surveyAttributes: [String: AttributeValue] = [:]
+
     private init() {
 		configurationService = WhiskrKitConfigurationService()
+    }
+
+    /// Creates an isolated instance with a given service, so tests do not touch the shared one.
+    internal init(configurationService: ConfigurationService, apiKey: String? = nil) {
+        self.configurationService = configurationService
+        self.apiKey = apiKey
+        usesMockedSurveys = true
     }
 
 
@@ -234,6 +245,11 @@ public class WhiskrKit {
             Logger.wkCore.error("WhiskrKit is not initialized with with an API key. Call initialize(apiKey:) first.")
             return
         }
+
+        // Snapshot at submit time, so attributes changed while the survey was on screen are included.
+        var response = response
+        let attributes = SurveyAttributesSanitizer.sanitize(surveyAttributes)
+        response.attributes = attributes.isEmpty ? nil : attributes
 
         let success = await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
         if success {
