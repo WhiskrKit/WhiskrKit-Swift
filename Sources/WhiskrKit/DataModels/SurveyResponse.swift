@@ -10,6 +10,21 @@ import Foundation
 
 struct SurveyResponse: Codable, Equatable {
     var results: [String: SurveyType]
+    /// Global attributes captured at submit time. Omitted from the payload when nil or empty.
+    var attributes: [String: AttributeValue]? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case results
+        case attributes
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(results, forKey: .results)
+        if let attributes, !attributes.isEmpty {
+            try container.encode(attributes, forKey: .attributes)
+        }
+    }
 
     enum SurveyType: Codable, Equatable {
         case npsRating(Int)

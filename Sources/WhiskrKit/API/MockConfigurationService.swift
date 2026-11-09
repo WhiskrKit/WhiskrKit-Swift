@@ -18,7 +18,7 @@ final class MockConfigurationService: ConfigurationService {
 
     @discardableResult
     func submitSurveyResponse(surveyId: String, response: SurveyResponse) async -> Bool {
-        Logger.wkNetworking.info("💾 User saved the following information: surveyId: \(surveyId) response: \(response.results)")
+        Logger.wkNetworking.info("💾 User saved the following information: surveyId: \(surveyId) response: \(response.results) attributes: \(response.attributes ?? [:])")
         return true
     }
 
