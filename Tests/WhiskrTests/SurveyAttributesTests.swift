@@ -200,6 +200,16 @@ struct AttributeSubmitTests {
         #expect(kit.surveyAttributes.isEmpty)
     }
 
+    @Test("Keys are trimmed on set and remove, so ' plan' and 'plan' are one attribute")
+    func trimmedKeys() {
+        let (kit, _) = make()
+        kit.setAttribute("plan", "free")
+        kit.setAttribute(" plan ", "pro")
+        #expect(kit.surveyAttributes == ["plan": "pro"])
+        kit.removeAttribute("plan ")
+        #expect(kit.surveyAttributes.isEmpty)
+    }
+
     @Test("Submit attaches attributes snapshotted at submit time")
     func snapshotAtSubmit() async throws {
         let (kit, service) = make()

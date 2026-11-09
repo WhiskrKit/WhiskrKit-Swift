@@ -155,6 +155,7 @@ extension WhiskrKit {
     /// Only strings, numbers and bools are supported. Do not send personal data such as
     /// emails, phone numbers, names, IBANs or card numbers: the server drops it.
     public func setAttribute(_ key: String, _ value: AttributeValue?) {
+        let key = key.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let value else {
             surveyAttributes[key] = nil
             return
@@ -172,7 +173,7 @@ extension WhiskrKit {
 
     /// Removes one attribute.
     public func removeAttribute(_ key: String) {
-        surveyAttributes[key] = nil
+        surveyAttributes[key.trimmingCharacters(in: .whitespacesAndNewlines)] = nil
     }
 
     /// Removes all attributes.
