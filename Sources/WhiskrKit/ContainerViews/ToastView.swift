@@ -58,6 +58,9 @@ struct ToastView: View {
                 )
                 .environment(submissionAlert)
                 submitButton
+                if template.branding.isVisible {
+                    PoweredByBadge(surface: .toast)
+                }
             } else {
                 buttonArea
             }

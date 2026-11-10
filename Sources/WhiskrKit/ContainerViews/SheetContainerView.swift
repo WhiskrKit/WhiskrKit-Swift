@@ -60,6 +60,9 @@ struct SheetContainerView: View {
                 followUpView
             }
             submitButton
+            if template.branding.isVisible {
+                PoweredByBadge(surface: .sheet)
+            }
         }
 		.toolbar {
 			ToolbarItemGroup(placement: .keyboard) {
