@@ -28,10 +28,6 @@ final class MockConfigurationService: ConfigurationService {
 
     let networkService: NetworkService
 
-    /// Whether the mocked toasts and sheets ask for the "Powered by WhiskrKit" badge,
-    /// like a server response with `branding.visible` set. Read on every fetch.
-    var showsBranding = false
-
     private var templates: [String: SurveyTemplate] = [:]
     private var inlineTemplates: [String: SurveyPresentation] = [:]
 
@@ -53,7 +49,9 @@ final class MockConfigurationService: ConfigurationService {
     }
 
     private func applyingBranding(to template: SurveyTemplate) -> SurveyTemplate {
-        let branding = Branding(visible: showsBranding)
+        // Mocked toasts and sheets always ask for the "Powered by WhiskrKit" badge, like a
+        // server response with `branding.visible` set, so it can be previewed.
+        let branding = Branding(visible: true)
         switch template.presentationBase {
         case .toast(var base):
             base.branding = branding

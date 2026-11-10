@@ -69,21 +69,7 @@ system color in the current mode), and a checkmark on the preset whose colors
 exactly match the current custom colors. Tapping a row replaces all custom colors
 with the preset's. No checkmark shows when the current colors match no preset.
 
-### 3.3 "Branding"
-
-- One switch, **"Show \"Powered by WhiskrKit\""**, off by default. It is not persisted.
-- Header: *"Branding"*. Footer: *"In a real app the server decides. Here it's mocked, for
-  toasts and sheets that have a submit button."*
-- When on, every mocked toast and sheet is served as if the server had sent
-  `branding.visible = true`, so the "Powered by WhiskrKit" badge appears below the
-  submit button. When off, the badge is hidden. Full-screen forms and the toast's
-  follow-up-buttons variant never show it. The next survey presented uses the current
-  value, so the badge can be checked in System, Light and Dark and with every preset.
-- The SDK renders the badge only when the server says so; the playground just mocks
-  that answer. On iOS the switch sets `WhiskrKit.shared.showsBrandingInMockedSurveys`,
-  which only affects mocked surveys.
-
-### 3.4 "Colors"
+### 3.3 "Colors"
 
 - First row: a three-way segmented control **"Preview in": System / Light / Dark**.
   It forces the app's appearance, presented surveys included, so a theme can be
@@ -95,7 +81,7 @@ with the preset's. No checkmark shows when the current colors match no preset.
 - Footer: *"A picked color is fixed: it looks the same in light and dark mode. Reset a
   color to go back to its adaptive system color."*
 
-### 3.5 "Code"
+### 3.4 "Code"
 
 - The generated snippet (section 9) in a small monospaced font, horizontally
   scrollable (no wrapping) and selectable.
@@ -325,11 +311,11 @@ Check each item in the other SDK before building its playground.
 
    Look for the same two patterns in the other SDK: setup work on the real service
    before the mock branch, and local eligibility writes that skip the mock check.
-6. **Mocked branding flag.** The mock service must be able to serve toasts and sheets
-   with the server's `branding.visible` flag on or off, switchable at runtime from the
-   playground (iOS: the public `showsBrandingInMockedSurveys` property, applied each
-   time a mocked survey is fetched). The badge itself is part of the SDK, not the
-   playground.
+6. **Mocked branding.** The mock service serves every mocked toast and sheet as if the
+   server had sent `branding.visible = true`, always, with no switch in the playground.
+   That way the "Powered by WhiskrKit" badge can be previewed in both appearances and
+   with every theme. Full-screen forms and the toast's follow-up-buttons variant never
+   show it. The badge itself is part of the SDK, not the playground.
 7. **Theme API shape.** iOS exposes a public initializer only; the theme's text styles
    have no public getters. So the playground builds the whole theme instead of copying
    `systemStyle` and changing a few values. If another SDK allows `copy(...)` or

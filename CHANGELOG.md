@@ -19,9 +19,11 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
   it with `branding.visible`. The server decides; the SDK only renders. A missing
   or malformed `branding` hides the badge and never breaks the survey. The text is
   translated, the product name is not. The badge is one VoiceOver element, scales
-  with Dynamic Type, and switches to black or white when the theme's secondary
-  text color would not reach a 4.5:1 contrast on the survey background.
-- The Playground has a switch to show the badge on its mocked surveys.
+  with Dynamic Type, and, when the theme's secondary text color would not reach a
+  4.5:1 contrast on the survey background, is darkened or lightened just enough
+  to get there.
+- The Playground's mocked toasts and sheets always show the badge, so it can be
+  previewed in every theme and appearance.
 - Translations of all built-in strings and VoiceOver labels into Dutch, German,
   French, Spanish, Italian, Portuguese (Brazil), Japanese, Korean and
   Simplified Chinese.
