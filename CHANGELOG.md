@@ -8,10 +8,20 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 
 ## Unreleased
 
+## 0.2.0 - 2026-11-10
+
 ### Added
 - Global survey attributes: `setAttribute`, `setAttributes`, `removeAttribute` and
   `clearAttributes` attach string, number or bool values to every survey
   response submitted afterwards. Personal data is dropped by the server.
+- A small "Powered by WhiskrKit" badge below the submit button of toasts and
+  sheets (including the iPad floating panel), shown only when the server enables
+  it with `branding.visible`. The server decides; the SDK only renders. A missing
+  or malformed `branding` hides the badge and never breaks the survey. The text is
+  translated, the product name is not. The badge is one VoiceOver element, scales
+  with Dynamic Type, and switches to black or white when the theme's secondary
+  text color would not reach a 4.5:1 contrast on the survey background.
+- The Playground has a switch to show the badge on its mocked surveys.
 - Translations of all built-in strings and VoiceOver labels into Dutch, German,
   French, Spanish, Italian, Portuguese (Brazil), Japanese, Korean and
   Simplified Chinese.
