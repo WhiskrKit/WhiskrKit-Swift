@@ -14,6 +14,7 @@ struct PlaygroundView: View {
 
 	@State private var appearance: Appearance = .system
 	@State private var copied = false
+	@State private var showsBranding = false
 
 	var body: some View {
 		NavigationStack {
@@ -36,6 +37,14 @@ struct PlaygroundView: View {
 					ForEach(ThemePreset.all) { preset in
 						presetRow(preset)
 					}
+				}
+
+				Section {
+					Toggle("Show \"Powered by WhiskrKit\"", isOn: $showsBranding)
+				} header: {
+					Text("Branding")
+				} footer: {
+					Text("In a real app the server decides. Here it's mocked, for toasts and sheets that have a submit button.")
 				}
 
 				Section {
@@ -72,6 +81,9 @@ struct PlaygroundView: View {
 			.navigationTitle("WhiskrKit Playground")
 		}
 		.preferredColorScheme(appearance.colorScheme)
+		.onChange(of: showsBranding, initial: true) {
+			WhiskrKit.shared.showsBrandingInMockedSurveys = showsBranding
+		}
 		.task(id: copied) {
 			guard copied else { return }
 			try? await Task.sleep(for: .seconds(2))

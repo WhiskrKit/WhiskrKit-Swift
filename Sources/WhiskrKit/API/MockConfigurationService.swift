@@ -28,6 +28,10 @@ final class MockConfigurationService: ConfigurationService {
 
     let networkService: NetworkService
 
+    /// Whether the mocked toasts and sheets ask for the "Powered by WhiskrKit" badge,
+    /// like a server response with `branding.visible` set. Read on every fetch.
+    var showsBranding = false
+
     private var templates: [String: SurveyTemplate] = [:]
     private var inlineTemplates: [String: SurveyPresentation] = [:]
 
@@ -45,7 +49,21 @@ final class MockConfigurationService: ConfigurationService {
         // Simulate network delay
         try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         // Return the template if it exists, nil otherwise
-        return templates[identifier] as? T
+        return templates[identifier].map(applyingBranding) as? T
+    }
+
+    private func applyingBranding(to template: SurveyTemplate) -> SurveyTemplate {
+        let branding = Branding(visible: showsBranding)
+        switch template.presentationBase {
+        case .toast(var base):
+            base.branding = branding
+            return SurveyTemplate(presentationBase: .toast(base: base))
+        case .sheet(var base):
+            base.branding = branding
+            return SurveyTemplate(presentationBase: .sheet(base: base))
+        case .fullScreenForm:
+            return template
+        }
     }
 
     // MARK: - Mock Template Setup

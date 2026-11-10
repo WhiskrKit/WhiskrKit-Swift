@@ -36,6 +36,14 @@ public class WhiskrKit {
     @ObservationIgnored
     var surveyAttributes: [String: AttributeValue] = [:]
 
+	/// Mock mode only: whether mocked toasts and sheets show the "Powered by WhiskrKit"
+	/// badge, as if the server had sent `branding.visible`. Takes effect on the next
+	/// survey presented. Ignored when not using mocked surveys; with real surveys the
+	/// server decides. Like the mock option itself, this will be removed.
+	public var showsBrandingInMockedSurveys: Bool = false {
+		didSet { (configurationService as? MockConfigurationService)?.showsBranding = showsBrandingInMockedSurveys }
+	}
+
     private init() {
 		configurationService = WhiskrKitConfigurationService()
     }
@@ -64,6 +72,7 @@ public class WhiskrKit {
 			// Swap in the mock before configuring: configuring the real service
 			// retries queued submissions against the production backend.
 			let mockService = MockConfigurationService()
+			mockService.showsBranding = showsBrandingInMockedSurveys
 			configurationService = mockService
 			configurationService.configure(apiKey: apiKey)
 			eligibilityService = MockEligibilityService(configurationService: mockService)
