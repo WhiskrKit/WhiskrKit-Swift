@@ -16,4 +16,6 @@ struct SheetTemplate: Decodable {
     let survey: SurveyPresentation
     /// Language the server served this survey in (e.g. "nl"); WhiskrKit's own strings follow it.
     var language: String? = nil
+    /// Server-controlled "Powered by WhiskrKit" badge. Missing or malformed means hidden.
+    var branding: Branding? = nil
 }
