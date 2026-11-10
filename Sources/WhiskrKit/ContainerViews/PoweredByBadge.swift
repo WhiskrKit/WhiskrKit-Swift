@@ -21,6 +21,9 @@ struct PoweredByBadge: View {
     @Environment(\.self) private var environment
     @Environment(\.isOnPanelSurface) private var isOnPanelSurface
     @ScaledMetric(relativeTo: .caption) private var logoSize: CGFloat = 12
+    /// Extra space above the badge, on top of the container's 8pt stack spacing, so it
+    /// sits about 16pt below the submit button and reads as separate from it.
+    @ScaledMetric(relativeTo: .caption) private var topPadding: CGFloat = 8
 
     let surface: Surface
 
@@ -33,14 +36,19 @@ struct PoweredByBadge: View {
     }
 
     private var textColor: Color {
-        let canvas = Color(.systemBackground)
-        return Color(
-            BrandingContrast.textColor(
+        // Dynamic system colors resolve against the current trait collection, which
+        // can lag behind the SwiftUI environment (a stale light trait while the
+        // survey is dark picks the wrong shade). Pin it to the environment's scheme.
+        let traits = UITraitCollection(userInterfaceStyle: environment.colorScheme == .dark ? .dark : .light)
+        var result = BrandingContrast.RGBA.black
+        traits.performAsCurrent {
+            result = BrandingContrast.textColor(
                 preferred: theme.subheadline.color.rgba(in: environment),
                 background: background.rgba(in: environment),
-                canvas: canvas.rgba(in: environment)
+                canvas: Color(.systemBackground).rgba(in: environment)
             )
-        )
+        }
+        return Color(result)
     }
 
     private let label = LocalizedStringResource.poweredByLabel("WhiskrKit")
@@ -60,6 +68,7 @@ struct PoweredByBadge: View {
         }
         .foregroundStyle(textColor)
         .frame(maxWidth: .infinity)
+        .padding(.top, topPadding)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(label)
     }
