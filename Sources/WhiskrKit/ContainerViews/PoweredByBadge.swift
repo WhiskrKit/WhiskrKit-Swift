@@ -19,6 +19,7 @@ struct PoweredByBadge: View {
 
     @Environment(\.WhiskrKitTheme) private var theme
     @Environment(\.self) private var environment
+    @Environment(\.isOnPanelSurface) private var isOnPanelSurface
     @ScaledMetric(relativeTo: .caption) private var logoSize: CGFloat = 12
 
     let surface: Surface
@@ -26,7 +27,8 @@ struct PoweredByBadge: View {
     private var background: Color {
         switch surface {
         case .toast: theme.container?.toast?.backgroundColor ?? Color(.secondarySystemBackground)
-        case .sheet: theme.container?.sheet?.backgroundColor ?? Color(.systemBackground)
+        // The floating panel draws glass or material, never the theme's sheet color.
+        case .sheet: (isOnPanelSurface ? nil : theme.container?.sheet?.backgroundColor) ?? Color(.systemBackground)
         }
     }
 
@@ -41,6 +43,8 @@ struct PoweredByBadge: View {
         )
     }
 
+    private let label = LocalizedStringResource.poweredByLabel("WhiskrKit")
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Image("WhiskrKitLogo", bundle: .module)
@@ -50,14 +54,14 @@ struct PoweredByBadge: View {
                 .frame(width: logoSize, height: logoSize)
                 .alignmentGuide(.firstTextBaseline) { $0[.bottom] }
                 .accessibilityHidden(true)
-            Text(.poweredByLabel("WhiskrKit"))
+            Text(label)
                 .font(.caption)
                 .multilineTextAlignment(.center)
         }
         .foregroundStyle(textColor)
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(.poweredByLabel("WhiskrKit"))
+        .accessibilityLabel(label)
     }
 }
 
@@ -76,5 +80,18 @@ private extension Color {
 private extension Color {
     init(_ rgba: BrandingContrast.RGBA) {
         self.init(.sRGB, red: rgba.red, green: rgba.green, blue: rgba.blue, opacity: rgba.alpha)
+    }
+}
+
+private struct OnPanelSurfaceKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// True inside the iPad floating panel, whose glass or material surface replaces
+    /// the theme's sheet background color.
+    var isOnPanelSurface: Bool {
+        get { self[OnPanelSurfaceKey.self] }
+        set { self[OnPanelSurfaceKey.self] = newValue }
     }
 }
