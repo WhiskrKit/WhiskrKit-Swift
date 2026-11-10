@@ -55,16 +55,36 @@ enum BrandingContrast {
     }
 
     /// The color to draw the badge text in: `preferred` when it reaches 4.5:1 against
-    /// the background, otherwise black or white, whichever contrasts more.
+    /// the background. Otherwise the smallest blend of `preferred` toward black (on a
+    /// light background) or white (on a dark one) that reaches 4.5:1, so the text stays
+    /// as close to the theme's own look as possible. Pure black or white, whichever
+    /// contrasts more, is the last resort (black or white always reach 4.5:1 on some
+    /// side, so it only guards the end of the search).
     ///
     /// Translucent colors are composited first: the background over `canvas` (what
-    /// sits behind the survey), then the text over that background.
+    /// sits behind the survey), then the text over that background. A blended result
+    /// is opaque.
     static func textColor(preferred: RGBA, background: RGBA, canvas: RGBA = .white) -> RGBA {
         let backdrop = blend(background, over: blend(canvas, over: .white))
         let text = blend(preferred, over: backdrop)
         if ratio(text, backdrop) >= minimumRatio {
             return preferred
         }
-        return ratio(.black, backdrop) >= ratio(.white, backdrop) ? .black : .white
+        let target: RGBA = ratio(.black, backdrop) >= ratio(.white, backdrop) ? .black : .white
+        for step in 1..<blendSteps {
+            let t = Double(step) / Double(blendSteps)
+            let candidate = RGBA(
+                red: text.red + (target.red - text.red) * t,
+                green: text.green + (target.green - text.green) * t,
+                blue: text.blue + (target.blue - text.blue) * t
+            )
+            if ratio(candidate, backdrop) >= minimumRatio {
+                return candidate
+            }
+        }
+        return target
     }
+
+    /// Resolution of the blend toward black or white (1% steps).
+    private static let blendSteps = 100
 }

@@ -130,20 +130,33 @@ struct BrandingContrastTests {
         #expect(BrandingContrast.textColor(preferred: dark, background: .white) == dark)
     }
 
-    @Test("Falls back to black on a light background when contrast is too low")
-    func fallsBackToBlack() {
+    @Test("Blends toward black on a light background when contrast is too low")
+    func blendsTowardBlack() {
         let lightGray = RGBA(red: 0.7, green: 0.7, blue: 0.7)
-        #expect(BrandingContrast.textColor(preferred: lightGray, background: .white) == .black)
+        let result = BrandingContrast.textColor(preferred: lightGray, background: .white)
+        #expect(BrandingContrast.ratio(result, .white) >= BrandingContrast.minimumRatio)
+        // Smallest step: a dark gray, not pure black, and still darker than where it started.
+        #expect(result != .black)
+        #expect(result.red < 0.7 && result.red > 0.3)
+        #expect(result.alpha == 1)
+        // One step less would not have been enough.
+        let lessBlended = RGBA(red: result.red + 0.007, green: result.green + 0.007, blue: result.blue + 0.007)
+        #expect(BrandingContrast.ratio(lessBlended, .white) < BrandingContrast.minimumRatio)
     }
 
-    @Test("Falls back to white on a dark background when contrast is too low")
-    func fallsBackToWhite() {
+    @Test("Blends toward white on a dark background when contrast is too low")
+    func blendsTowardWhite() {
         let navy = RGBA(red: 0.1, green: 0.1, blue: 0.18)
         let dimmed = RGBA(red: 0.25, green: 0.25, blue: 0.4)
-        #expect(BrandingContrast.textColor(preferred: dimmed, background: navy) == .white)
+        let result = BrandingContrast.textColor(preferred: dimmed, background: navy)
+        #expect(BrandingContrast.ratio(result, navy) >= BrandingContrast.minimumRatio)
+        #expect(result != .white)
+        #expect(result.blue > dimmed.blue && result.blue < 1)
+        // Keeps the theme's hue: still bluer than it is red.
+        #expect(result.blue > result.red)
     }
 
-    @Test("The result always reaches 4.5:1 or the best of black and white")
+    @Test("The result always reaches 4.5:1 or is the best of black and white")
     func resultIsReadable() {
         let backgrounds = [RGBA.white, .black, RGBA(red: 0.5, green: 0.5, blue: 0.5), RGBA(red: 0.9, green: 0.4, blue: 0.1)]
         let texts = [RGBA.white, .black, RGBA(red: 0.5, green: 0.5, blue: 0.5), RGBA(red: 0.2, green: 0.5, blue: 0.9)]
@@ -163,15 +176,19 @@ struct BrandingContrastTests {
         let strong = RGBA(red: 0, green: 0, blue: 0, alpha: 0.6)
         let faint = RGBA(red: 0, green: 0, blue: 0, alpha: 0.25)
         #expect(BrandingContrast.textColor(preferred: strong, background: .white) == strong)
-        #expect(BrandingContrast.textColor(preferred: faint, background: .white) == .black)
+        let result = BrandingContrast.textColor(preferred: faint, background: .white)
+        #expect(BrandingContrast.ratio(result, .white) >= BrandingContrast.minimumRatio)
+        #expect(result.alpha == 1)
     }
 
     @Test("A translucent background is composited over the canvas first")
     func translucentBackground() {
-        // 10% black over a black canvas is black, so mid gray text reads fine... as white text.
+        // 10% black over a black canvas is black, so dark gray text must lighten.
         let background = RGBA(red: 0, green: 0, blue: 0, alpha: 0.1)
         let gray = RGBA(red: 0.3, green: 0.3, blue: 0.3)
-        #expect(BrandingContrast.textColor(preferred: gray, background: background, canvas: .black) == .white)
+        let result = BrandingContrast.textColor(preferred: gray, background: background, canvas: .black)
+        #expect(result.red > 0.3)
+        #expect(BrandingContrast.ratio(result, .black) >= BrandingContrast.minimumRatio)
     }
 
     @Test("Blend composites with alpha")
