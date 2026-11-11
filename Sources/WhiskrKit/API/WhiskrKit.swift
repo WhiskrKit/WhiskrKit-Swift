@@ -36,6 +36,19 @@ public class WhiskrKit {
     @ObservationIgnored
     var surveyAttributes: [String: AttributeValue] = [:]
 
+    /// Called on the main actor each time the user submits a survey, with the survey
+    /// id and the answers given. It fires as soon as the user submits, whether or not
+    /// the response reaches the server (a failed submission is queued and retried),
+    /// and never when a survey is dismissed without submitting. Also called in mock mode.
+    ///
+    /// ```swift
+    /// WhiskrKit.shared.onSurveyCompleted = { completion in
+    ///     analytics.log("survey_completed", ["id": completion.surveyId])
+    /// }
+    /// ```
+    @ObservationIgnored
+    public var onSurveyCompleted: (@MainActor (SurveyCompletion) -> Void)?
+
     private init() {
 		configurationService = WhiskrKitConfigurationService()
     }
@@ -245,6 +258,9 @@ public class WhiskrKit {
             Logger.wkCore.error("WhiskrKit is not initialized with with an API key. Call initialize(apiKey:) first.")
             return
         }
+
+        // The user has submitted: report it now, independent of the network result.
+        onSurveyCompleted?(SurveyCompletion(surveyId: surveyId, response: response))
 
         // Snapshot at submit time, so attributes changed while the survey was on screen are included.
         var response = response

@@ -203,6 +203,30 @@ Limits: at most 20 attributes, keys of 1 to 64 characters, string values of up t
 > or phone number). In debug builds the SDK logs a warning when an attribute
 > looks like personal data, but it never changes what you set.
 
+## Survey completion
+
+Set `onSurveyCompleted` to hear when the user submits a survey, for example to log
+it in your own analytics or to move on in a flow:
+
+```swift
+WhiskrKit.shared.onSurveyCompleted = { completion in
+    analytics.log("survey_completed", ["survey": completion.surveyId])
+    for answer in completion.answers {
+        print(answer.questionId, answer.questionType, answer.value)
+    }
+}
+```
+
+`SurveyCompletion` holds the survey id and the submitted answers, each with its
+question id, question type (`scaleRating`, `symbolRating`, `thumbsRating`,
+`textualSurvey` or `multipleChoice`) and value (`.score`, `.thumbs(isUp:)`,
+`.text` or `.choices`). Questions left unanswered are not included.
+
+The callback runs on the main actor as soon as the user submits, whether or not
+the response reaches the server (a failed submission is queued and retried). It is
+not called when a survey is dismissed without submitting, and it is also called in
+mock mode.
+
 ## Using WhiskrKit in UIKit apps
 
 Not a SwiftUI app? No problem. WhiskrKit works just as well in classic UIKit apps, 

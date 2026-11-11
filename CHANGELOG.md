@@ -8,9 +8,13 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 
 ## Unreleased
 
-## 0.2.0 - 2026-11-10
+## 0.2.0 - 2026-11-11
 
 ### Added
+- `WhiskrKit.shared.onSurveyCompleted`: called on the main actor when the user
+  submits a survey, with the survey id and the submitted answers (question id,
+  question type and value). It fires whether or not the response reaches the
+  server, and not when a survey is dismissed without submitting.
 - Global survey attributes: `setAttribute`, `setAttributes`, `removeAttribute` and
   `clearAttributes` attach string, number or bool values to every survey
   response submitted afterwards. Personal data is dropped by the server.
@@ -32,6 +36,8 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
   app's language as before.
 
 ### Changed
+- Star questions no longer read the unused `opensStoreReview` field, so a survey
+  without it decodes as well.
 - The star rating is a single adjustable VoiceOver element: swipe up or down to
   change the rating.
 - Multiple choice options announce their state with the standard "Selected"
