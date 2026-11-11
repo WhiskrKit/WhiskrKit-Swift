@@ -22,7 +22,8 @@ protocol StoreReviewRequester {
 struct SystemStoreReviewRequester: StoreReviewRequester {
     func requestReview() -> Bool {
         let scene = UIApplication.shared.connectedScenes
-            .first { $0.activationState == .foregroundActive } as? UIWindowScene
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
         guard let scene else {
             Logger.wkCore.info("⭐️ No foreground active window scene; skipping the App Store review request.")
             return false
