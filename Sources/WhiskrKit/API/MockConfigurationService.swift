@@ -102,7 +102,9 @@ final class MockConfigurationService: ConfigurationService {
             id: "sheet-2",
             title: "New Feature Feedback",
             description: "What do you think of our latest update?",
-            surveyType: .symbolRating
+            surveyType: .symbolRating,
+            // Rating 4 or 5 stars and submitting logs the App Store review follow-up.
+            opensStoreReview: true
         )
 
         templates["checkout-survey"] = createSheetTemplate(
@@ -194,9 +196,10 @@ final class MockConfigurationService: ConfigurationService {
         title: String?,
         description: String?,
         followUpQuestion: String? = nil,
-        surveyType: SurveyPresentation.SurveyType
+        surveyType: SurveyPresentation.SurveyType,
+        opensStoreReview: Bool = false
     ) -> SurveyTemplate {
-        let survey = createSurveyPresentation(type: surveyType, id: "\(id)-survey")
+        let survey = createSurveyPresentation(type: surveyType, id: "\(id)-survey", opensStoreReview: opensStoreReview)
 
         let sheetTemplate = SheetTemplate(
             id: id,
@@ -237,7 +240,8 @@ final class MockConfigurationService: ConfigurationService {
 
     private func createSurveyPresentation(
         type: SurveyPresentation.SurveyType,
-        id: String
+        id: String,
+        opensStoreReview: Bool = false
     ) -> SurveyPresentation {
         let surveyBase: SurveyPresentation.SurveyBase
 
@@ -260,7 +264,7 @@ final class MockConfigurationService: ConfigurationService {
                     id: id,
                     title: "Rate your experience",
                     description: "Tap the stars to rate",
-                    opensStoreReview: false,
+                    opensStoreReview: opensStoreReview,
                     isRequired: false,
                     A11yLabel: nil,
                     A11yHint: nil
