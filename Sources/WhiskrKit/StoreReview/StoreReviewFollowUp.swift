@@ -18,8 +18,11 @@ import OSLog
 ///   and was rated at least ``minimumRating``;
 /// - no review was requested yet for the current app version (`CFBundleShortVersionString`).
 ///
-/// The request is made after ``delay`` so it does not collide with the survey's
-/// dismissal animation. iOS decides whether the prompt actually appears and throttles it further.
+/// The request is made ``delay`` after the user submitted (the survey is dismissed at that
+/// moment), so it does not collide with the dismissal animation. When the submission
+/// itself took longer than ``maximumWait`` the prompt would appear out of context, so it is
+/// skipped (without using up the version). iOS decides whether the prompt actually appears
+/// and throttles it further.
 @MainActor
 final class StoreReviewFollowUp {
     /// A star rating at or above this asks for a review.
@@ -29,17 +32,20 @@ final class StoreReviewFollowUp {
     private let storage: any StoreReviewStorage
     private let appVersion: () -> String?
     private let delay: Duration
+    private let maximumWait: Duration
 
     init(
         requester: any StoreReviewRequester = SystemStoreReviewRequester(),
         storage: any StoreReviewStorage = UserDefaultsStoreReviewStorage(),
         appVersion: @escaping () -> String? = { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String },
-        delay: Duration = .milliseconds(700)
+        delay: Duration = .milliseconds(700),
+        maximumWait: Duration = .seconds(10)
     ) {
         self.requester = requester
         self.storage = storage
         self.appVersion = appVersion
         self.delay = delay
+        self.maximumWait = maximumWait
     }
 
     /// True when a store-review star question in `questionIds` was rated at least ``minimumRating``.
@@ -52,17 +58,18 @@ final class StoreReviewFollowUp {
         }
     }
 
-    /// Call only after a successful submission. In mock mode StoreKit is never called
-    /// and nothing is persisted; the would-be request is logged instead.
+    /// Call only after a successful submission. `submittedAt` is when the user tapped
+    /// submit. In mock mode StoreKit is never called and nothing is persisted; the
+    /// would-be request is logged instead.
     func handleSubmission(
         _ response: SurveyResponse,
         storeReviewQuestionIds questionIds: Set<String>,
+        submittedAt: ContinuousClock.Instant,
         isMocked: Bool
     ) async {
         guard Self.qualifies(response, storeReviewQuestionIds: questionIds) else { return }
 
         if isMocked {
-            try? await Task.sleep(for: delay)
             Logger.wkCore.info("⭐️ Mocked surveys: an App Store review would have been requested now.")
             return
         }
@@ -73,7 +80,12 @@ final class StoreReviewFollowUp {
             return
         }
 
-        try? await Task.sleep(for: delay)
+        guard ContinuousClock.now - submittedAt <= maximumWait else {
+            Logger.wkCore.info("⭐️ Submission took too long; skipping the App Store review request.")
+            return
+        }
+
+        try? await Task.sleep(until: submittedAt + delay, clock: .continuous)
 
         // Checked again: another survey may have asked while this one waited.
         guard storage.lastRequestedAppVersion != version else { return }

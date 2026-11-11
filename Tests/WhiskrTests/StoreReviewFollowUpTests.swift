@@ -56,7 +56,10 @@ struct StoreReviewFollowUpTests {
     private let service = StubConfigurationService()
 
     private func makeKit(mocked: Bool = false, version: @escaping () -> String? = { "1.0" }) -> WhiskrKit {
-        let defaults = UserDefaults(suiteName: "StoreReviewFollowUpTests-\(UUID().uuidString)")!
+        // One shared, emptied suite: completion tracking writes there, the assertions never read it.
+        let suite = "StoreReviewFollowUpTests"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
         return WhiskrKit(
             configurationService: service,
             apiKey: "test",
@@ -154,6 +157,21 @@ struct StoreReviewFollowUpTests {
         #expect(requester.requestCount == 1)
     }
 
+    @Test("A submission that took too long does not ask and keeps the version unused")
+    func staleSubmission() async {
+        let followUp = StoreReviewFollowUp(
+            requester: requester, storage: storage, appVersion: { "1.0" }, delay: .zero, maximumWait: .seconds(10)
+        )
+        await followUp.handleSubmission(
+            SurveyResponse(results: ["q1": .symbolRating(5)]),
+            storeReviewQuestionIds: ["q1"],
+            submittedAt: ContinuousClock.now - .seconds(11),
+            isMocked: false
+        )
+        #expect(requester.requestCount == 0)
+        #expect(storage.lastRequestedAppVersion == nil)
+    }
+
     @Test("A high rating on a star question without the flag does not count")
     func otherQuestionHighRating() {
         let response = SurveyResponse(results: ["plain-star": .symbolRating(5), "review-star": .symbolRating(3)])
@@ -171,7 +189,10 @@ struct StoreReviewFollowUpTests {
 
     @Test("The version is stored in UserDefaults under the WhiskrKit prefix")
     func userDefaultsStorage() {
-        let defaults = UserDefaults(suiteName: "StoreReviewStorage-\(UUID().uuidString)")!
+        let suite = "StoreReviewStorageTests"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
         let storage = UserDefaultsStoreReviewStorage(userDefaults: defaults)
         #expect(storage.lastRequestedAppVersion == nil)
         storage.lastRequestedAppVersion = "2.0"

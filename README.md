@@ -217,7 +217,9 @@ After the user submits a survey, WhiskrKit asks iOS for the review prompt when:
   (`CFBundleShortVersionString`); WhiskrKit asks at most once per version.
 
 The request is made shortly after the survey is dismissed, using StoreKit's
-system prompt (`AppStore.requestReview(in:)`) only. iOS decides whether the prompt
+system prompt (`AppStore.requestReview(in:)`) only. If the submission takes longer
+than about 10 seconds (a slow network), the request is skipped so the prompt never
+shows up out of context. iOS decides whether the prompt
 actually appears and limits how often it is shown, so a request does not
 guarantee a prompt. In mock mode StoreKit is never called; WhiskrKit logs that a
 review would have been requested.

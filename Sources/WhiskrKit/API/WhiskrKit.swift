@@ -265,6 +265,8 @@ public class WhiskrKit {
             return
         }
 
+        let submittedAt = ContinuousClock.now
+
         // Snapshot at submit time, so attributes changed while the survey was on screen are included.
         var response = response
         let attributes = SurveyAttributesSanitizer.sanitize(surveyAttributes)
@@ -276,6 +278,7 @@ public class WhiskrKit {
             await storeReviewFollowUp.handleSubmission(
                 response,
                 storeReviewQuestionIds: storeReviewQuestionIds,
+                submittedAt: submittedAt,
                 isMocked: usesMockedSurveys
             )
         }
