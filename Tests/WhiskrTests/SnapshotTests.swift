@@ -38,6 +38,8 @@ struct SnapshotTests {
         dark: Bool = false,
         alert: SubmissionAlert = SubmissionAlert(),
         background: UIColor = .systemBackground,
+        theme: WhiskrKitTheme = .systemStyle,
+        dynamicType: DynamicTypeSize = .large,
         named name: String? = nil,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,
@@ -46,7 +48,8 @@ struct SnapshotTests {
         column: UInt = #column
     ) {
         let wrapped = view
-            .environment(\.WhiskrKitTheme, .systemStyle)
+            .environment(\.WhiskrKitTheme, theme)
+            .environment(\.dynamicTypeSize, dynamicType)
             .environment(\.locale, Self.locale)
             .environment(alert)
             .padding()
@@ -454,5 +457,122 @@ struct SnapshotTests {
             dark: true,
             background: .systemGroupedBackground
         )
+    }
+
+    // MARK: - "Powered by WhiskrKit" badge
+
+    private func brandedSheet(_ branding: Bool) -> SheetTemplate {
+        var template = sheetTemplate
+        template.branding = branding ? Branding(visible: true) : nil
+        return template
+    }
+
+    private func brandedToast(_ branding: Bool) -> ToastTemplate {
+        ToastTemplate(
+            id: "t1",
+            title: "Planning your trip",
+            description: "How satisfied are you with our new planner?",
+            followUpIdentifier: nil,
+            survey: SurveyPresentation(
+                surveyBase: .thumbsRating(
+                    base: ThumbsSurveyTemplate(
+                        id: "q1", title: nil, subtitle: nil, isRequired: false, A11yLabel: nil, A11yHint: nil
+                    )
+                )
+            ),
+            branding: branding ? Branding(visible: true) : nil
+        )
+    }
+
+    /// Low-contrast secondary text on a dark custom surface: the badge must fall back to white.
+    private var lowContrastTheme: WhiskrKitTheme {
+        var theme = WhiskrKitTheme.systemStyle
+        let navy = Color(red: 0.106, green: 0.106, blue: 0.184)
+        theme.container = .init(
+            sheet: .init(backgroundColor: navy),
+            toast: .init(cornerRadius: 8, backgroundColor: navy, withShadow: false)
+        )
+        theme.title.color = Color(red: 0.95, green: 0.95, blue: 0.97)
+        theme.headline.color = Color(red: 0.95, green: 0.95, blue: 0.97)
+        theme.body.color = Color(red: 0.95, green: 0.95, blue: 0.97)
+        theme.subtitle.color = Color(red: 0.65, green: 0.65, blue: 0.75)
+        theme.subheadline.color = Color(red: 0.25, green: 0.25, blue: 0.42)
+        theme.button.primary = .variant(.init(
+            backgroundColor: Color(red: 0.96, green: 0.77, blue: 0.26),
+            textColor: Color(red: 0.106, green: 0.106, blue: 0.184),
+            font: .body.weight(.medium),
+            cornerRadius: 10
+        ))
+        return theme
+    }
+
+    private static let navy = UIColor(red: 0.106, green: 0.106, blue: 0.184, alpha: 1)
+
+    @Test("Toast — with branding")
+    func toast_branding() {
+        snap(toastView(brandedToast(true)), height: 420, background: .systemGroupedBackground)
+    }
+
+    @Test("Toast — without branding")
+    func toast_noBranding() {
+        snap(toastView(brandedToast(false)), height: 420, background: .systemGroupedBackground)
+    }
+
+    @Test("Toast — with branding, dark")
+    func toast_branding_dark() {
+        snap(toastView(brandedToast(true)), height: 420, dark: true, background: .systemGroupedBackground)
+    }
+
+    @Test("Toast — with branding, accessibility Dynamic Type")
+    func toast_branding_a11yType() {
+        snap(
+            toastView(brandedToast(true)),
+            height: 1500,
+            background: .systemGroupedBackground,
+            dynamicType: .accessibility3
+        )
+    }
+
+    @Test("Toast — with branding, custom low-contrast theme")
+    func toast_branding_themed() {
+        snap(toastView(brandedToast(true)), height: 420, dark: true, background: Self.navy, theme: lowContrastTheme)
+    }
+
+    @Test("Sheet — with branding")
+    func sheet_branding() {
+        snap(SheetContainerView(template: brandedSheet(true)), height: 520)
+    }
+
+    @Test("Sheet — without branding")
+    func sheet_noBranding() {
+        snap(SheetContainerView(template: brandedSheet(false)), height: 520)
+    }
+
+    @Test("Sheet — with branding, dark")
+    func sheet_branding_dark() {
+        snap(SheetContainerView(template: brandedSheet(true)), height: 520, dark: true)
+    }
+
+    @Test("Sheet — with branding, accessibility Dynamic Type")
+    func sheet_branding_a11yType() {
+        snap(
+            SheetContainerView(template: brandedSheet(true)),
+            height: 1100,
+            dynamicType: .accessibility3
+        )
+    }
+
+    @Test("Sheet — with branding, largest accessibility Dynamic Type")
+    func sheet_branding_a11yTypeLargest() {
+        snap(
+            SheetContainerView(template: brandedSheet(true)),
+            height: 1300,
+            dynamicType: .accessibility5
+        )
+    }
+
+    @Test("Sheet — with branding, custom low-contrast theme")
+    func sheet_branding_themed() {
+        snap(SheetContainerView(template: brandedSheet(true)), height: 520, dark: true, background: Self.navy, theme: lowContrastTheme)
     }
 }

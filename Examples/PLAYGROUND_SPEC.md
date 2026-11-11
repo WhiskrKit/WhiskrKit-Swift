@@ -311,7 +311,12 @@ Check each item in the other SDK before building its playground.
 
    Look for the same two patterns in the other SDK: setup work on the real service
    before the mock branch, and local eligibility writes that skip the mock check.
-6. **Theme API shape.** iOS exposes a public initializer only; the theme's text styles
+6. **Mocked branding.** The mock service serves every mocked toast and sheet as if the
+   server had sent `branding.visible = true`, always, with no switch in the playground.
+   That way the "Powered by WhiskrKit" badge can be previewed in both appearances and
+   with every theme. Full-screen forms and the toast's follow-up-buttons variant never
+   show it. The badge itself is part of the SDK, not the playground.
+7. **Theme API shape.** iOS exposes a public initializer only; the theme's text styles
    have no public getters. So the playground builds the whole theme instead of copying
    `systemStyle` and changing a few values. If another SDK allows `copy(...)` or
    similar, the snippet may use it, as long as the result matches section 6.

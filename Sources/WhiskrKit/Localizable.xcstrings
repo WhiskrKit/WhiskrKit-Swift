@@ -1815,67 +1815,68 @@
         }
       }
     },
-    "rating_button_thumbsDown" : {
+    "powered_by_label" : {
+      "comment" : "Small badge below the submit button, shown when the server enables branding; %@ is the product name \"WhiskrKit\", which is never translated",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Daumen runter"
+            "value" : "Unterstützt von %@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thumbs down"
+            "value" : "Powered by %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pulgar abajo"
+            "value" : "Con tecnología de %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pouce baissé"
+            "value" : "Propulsé par %@"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pollice in giù"
+            "value" : "Offerto da %@"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "低評価"
+            "value" : "%@ 提供"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "싫어요"
+            "value" : "%@ 제공"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duim omlaag"
+            "value" : "Mogelijk gemaakt door %@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Polegar para baixo"
+            "value" : "Desenvolvido por %@"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "踩"
+            "value" : "由 %@ 提供支持"
           }
         }
       }
@@ -1941,6 +1942,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "赞"
+          }
+        }
+      }
+    },
+    "rating_button_thumbsDown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daumen runter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbs down"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulgar abajo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pouce baissé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pollice in giù"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低評価"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "싫어요"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duim omlaag"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polegar para baixo"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "踩"
           }
         }
       }

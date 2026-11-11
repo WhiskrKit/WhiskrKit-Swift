@@ -136,6 +136,7 @@ struct FloatingPanelView: View {
                     // Route the close button and post-submit dismissal through the
                     // same slide-off animation as a drag dismiss.
                     .environment(\.whiskrKitDismiss, { performDismiss() })
+                    .environment(\.isOnPanelSurface, true)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
             }
             .scrollBounceBehavior(.basedOnSize)
