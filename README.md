@@ -7,15 +7,6 @@
 WhiskrKit provides a flexible and easy-to-use API for presenting various types of 
 questionnaires and feedback forms in your SwiftUI applications.
 
-## To do
-
-Before this framework has *production state*, the following items need to be added:
-
-- [x] Mechanism to show surveys based on triggers like: time, app restarts, user 
-      size of the host app, or manual triggering.
-- [x] iPad specific layout.
-- [ ] Implement follow-up option to App Store Rating.
-
 For feature requests or changes to this native Swift version of WhiskrKit, you can 
 create an issue. If you have requests or questions for WhiskrKit in general, please 
 contact us directly via the dashboard (once available) or via mail.
@@ -211,6 +202,25 @@ Limits: at most 20 attributes, keys of 1 to 64 characters, string values of up t
 > `phone`, `name` or `address`, or values that are an email, IBAN, card number
 > or phone number). In debug builds the SDK logs a warning when an attribute
 > looks like personal data, but it never changes what you set.
+
+## App Store review follow-up
+
+A star rating question can be followed by Apple's own App Store review prompt.
+Switch it on per star question in the dashboard.
+
+After the user submits a survey, WhiskrKit asks iOS for the review prompt when:
+
+- a star question with the follow-up switched on was rated **4 stars or more**;
+- the response was submitted successfully (closing the survey without submitting,
+  or a submission that failed and is queued for retry, never asks);
+- no review was requested yet for the current app version
+  (`CFBundleShortVersionString`); WhiskrKit asks at most once per version.
+
+The request is made shortly after the survey is dismissed, using StoreKit's
+system prompt (`AppStore.requestReview(in:)`) only. iOS decides whether the prompt
+actually appears and limits how often it is shown, so a request does not
+guarantee a prompt. In mock mode StoreKit is never called; WhiskrKit logs that a
+review would have been requested.
 
 ## Using WhiskrKit in UIKit apps
 
