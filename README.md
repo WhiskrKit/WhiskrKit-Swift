@@ -173,10 +173,11 @@ func userNotificationCenter(
 
 ## Attributes
 
-Attach context about the current user or session to survey responses, so you can
-filter results later (for example by plan or app version). Attributes are global,
-held in memory only and sent with every response you submit after setting them,
-so set them again on each launch.
+Attach context about the current user or session to every survey response
+submitted afterwards, such as the user's plan or an experiment variant. They're
+stored with each response; see [Attributes](https://whiskrkit.eu/docs/attributes/) for what to send and what
+not. Attributes are global and held in memory only, so set them again on each
+launch.
 
 ```swift
 WhiskrKit.shared.setAttribute("plan", "pro")
@@ -201,7 +202,8 @@ Limits: at most 20 attributes, keys of 1 to 64 characters, string values of up t
 > attributes that look like personal data (for example keys such as `email`,
 > `phone`, `name` or `address`, or values that are an email, IBAN, card number
 > or phone number). In debug builds the SDK logs a warning when an attribute
-> looks like personal data, but it never changes what you set.
+> looks like personal data, but it never changes what you set. See
+> [Privacy](https://whiskrkit.eu/docs/attributes/#privacy).
 
 ## Survey completion
 
