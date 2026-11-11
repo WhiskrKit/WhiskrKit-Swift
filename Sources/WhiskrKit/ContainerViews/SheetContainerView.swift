@@ -137,8 +137,7 @@ struct SheetContainerView: View {
             Task {
                 await WhiskrKit.shared.submitSurveyResponse(
                     surveyId: template.id,
-                    response: surveyResponse,
-                    storeReviewQuestionIds: template.storeReviewQuestionIds
+                    response: surveyResponse
                 )
             }
             dismissSurvey()

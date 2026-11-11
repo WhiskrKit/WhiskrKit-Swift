@@ -85,7 +85,6 @@ struct SymbolRatingView: View {
             id: "1234",
             title: "Ticket purchase",
             description: "How well did buying your ticket go?",
-            opensStoreReview: false,
             isRequired: true,
             A11yLabel: "",
             A11yHint: ""

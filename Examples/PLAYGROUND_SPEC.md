@@ -102,7 +102,7 @@ icon, `group`.
 | Group | Name | Mock id | Presentation | Content |
 |---|---|---|---|---|
 | Question types | Scale rating | `onboarding-survey` | sheet | Title "Welcome aboard!", description "Help us understand your needs better", follow-up question "What could we do better?". Scale rating "How likely are you to recommend us?", range 1–8, required. |
-| Question types | Symbol rating | `feature-feedback` | sheet | Title "New Feature Feedback", description "What do you think of our latest update?". Five-star rating "Rate your experience", optional, with the App Store review follow-up (`opensStoreReview`) on: submitting 4 or 5 stars logs that a review would have been requested. |
+| Question types | Symbol rating | `feature-feedback` | sheet | Title "New Feature Feedback", description "What do you think of our latest update?". Five-star rating "Rate your experience", optional. |
 | Question types | Thumbs rating | `checkout-survey` | sheet | Title "How was your checkout?", description "We'd love to hear your thoughts". Thumbs up/down, optional. |
 | Question types | Text feedback | `ask-survey` | sheet | Title "What would you ask us?". Free text "Tell us more", max 200 characters, required. |
 | Question types | Multiple choice | `choice-survey` | sheet | Title "You recently visited the Avatar", follow-up question "What did you like most?". Multi-select "What element is your strength?" with Water, Fire, Earth, Air; required. |
@@ -141,7 +141,6 @@ state. On iOS (after the fixes in section 10) that means:
 | Eligibility check | Delegates to the mock fetch, no request |
 | Submit response | Logged only |
 | Impressions | Not sent (guard in `recordImpression`), and the mock logs only |
-| App Store review follow-up | StoreKit never called and no version stored; logs that a review would have been requested |
 | Retry queued submissions | Not started (the real service is never configured) |
 | "Seen" and "completed" survey storage | Not written |
 

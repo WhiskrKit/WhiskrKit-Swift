@@ -30,15 +30,8 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 - WhiskrKit's own strings follow the language a survey was served in when the
   survey response includes a `language` field. Without it, they follow the
   app's language as before.
-- App Store review follow-up: after a successful submission, a star question
-  with `opensStoreReview` switched on and rated 4 stars or more asks iOS for the
-  system review prompt (StoreKit), at most once per app version. Dismissing or a
-  failed (queued) submission never asks; iOS decides whether the prompt shows.
-  In mock mode it is only logged; the mocked `feature-feedback` sheet has it on.
 
 ### Changed
-- A star question without `opensStoreReview` (or with `null` or a wrong type)
-  now decodes as switched off instead of failing the whole survey.
 - The star rating is a single adjustable VoiceOver element: swipe up or down to
   change the rating.
 - Multiple choice options announce their state with the standard "Selected"

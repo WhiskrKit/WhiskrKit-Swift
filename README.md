@@ -203,27 +203,6 @@ Limits: at most 20 attributes, keys of 1 to 64 characters, string values of up t
 > or phone number). In debug builds the SDK logs a warning when an attribute
 > looks like personal data, but it never changes what you set.
 
-## App Store review follow-up
-
-A star rating question can be followed by Apple's own App Store review prompt.
-Switch it on per star question in the dashboard.
-
-After the user submits a survey, WhiskrKit asks iOS for the review prompt when:
-
-- a star question with the follow-up switched on was rated **4 stars or more**;
-- the response was submitted successfully (closing the survey without submitting,
-  or a submission that failed and is queued for retry, never asks);
-- no review was requested yet for the current app version
-  (`CFBundleShortVersionString`); WhiskrKit asks at most once per version.
-
-The request is made shortly after the survey is dismissed, using StoreKit's
-system prompt (`AppStore.requestReview(in:)`) only. If the submission takes longer
-than about 10 seconds (a slow network), the request is skipped so the prompt never
-shows up out of context. iOS decides whether the prompt
-actually appears and limits how often it is shown, so a request does not
-guarantee a prompt. In mock mode StoreKit is never called; WhiskrKit logs that a
-review would have been requested.
-
 ## Using WhiskrKit in UIKit apps
 
 Not a SwiftUI app? No problem. WhiskrKit works just as well in classic UIKit apps, 

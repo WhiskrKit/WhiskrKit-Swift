@@ -22,7 +22,6 @@ public class WhiskrKit {
 
     private var eligibilityStorage: any EligibilityStorage = UserDefaultsEligibilityStorage()
     private var eligibilityService: EligibilityService?
-    private let storeReviewFollowUp: StoreReviewFollowUp
 
     /// In mock mode, no eligibility state is written and no impressions are sent.
     private var usesMockedSurveys = false
@@ -39,24 +38,13 @@ public class WhiskrKit {
 
     private init() {
 		configurationService = WhiskrKitConfigurationService()
-		storeReviewFollowUp = StoreReviewFollowUp()
     }
 
     /// Creates an isolated instance with a given service, so tests do not touch the shared one.
-    internal init(
-        configurationService: ConfigurationService,
-        apiKey: String? = nil,
-        usesMockedSurveys: Bool = true,
-        eligibilityStorage: (any EligibilityStorage)? = nil,
-        storeReviewFollowUp: StoreReviewFollowUp? = nil
-    ) {
+    internal init(configurationService: ConfigurationService, apiKey: String? = nil) {
         self.configurationService = configurationService
         self.apiKey = apiKey
-        self.usesMockedSurveys = usesMockedSurveys
-        if let eligibilityStorage {
-            self.eligibilityStorage = eligibilityStorage
-        }
-        self.storeReviewFollowUp = storeReviewFollowUp ?? StoreReviewFollowUp()
+        usesMockedSurveys = true
     }
 
 
@@ -252,20 +240,11 @@ public class WhiskrKit {
         return try? await configurationService.fetchSurveyTemplate(for: identifier)
     }
 
-    /// Submits a response. After a successful submission, a high rating on one of
-    /// `storeReviewQuestionIds` may be followed by the App Store review prompt
-    /// (see ``StoreReviewFollowUp``); a failed (queued) submission never asks.
-    internal func submitSurveyResponse(
-        surveyId: String,
-        response: SurveyResponse,
-        storeReviewQuestionIds: Set<String> = []
-    ) async {
+    internal func submitSurveyResponse(surveyId: String, response: SurveyResponse) async {
         guard apiKey != nil else {
             Logger.wkCore.error("WhiskrKit is not initialized with with an API key. Call initialize(apiKey:) first.")
             return
         }
-
-        let submittedAt = ContinuousClock.now
 
         // Snapshot at submit time, so attributes changed while the survey was on screen are included.
         var response = response
@@ -275,12 +254,6 @@ public class WhiskrKit {
         let success = await configurationService.submitSurveyResponse(surveyId: surveyId, response: response)
         if success {
             trackSurveyCompletion(surveyId: surveyId)
-            await storeReviewFollowUp.handleSubmission(
-                response,
-                storeReviewQuestionIds: storeReviewQuestionIds,
-                submittedAt: submittedAt,
-                isMocked: usesMockedSurveys
-            )
         }
     }
 

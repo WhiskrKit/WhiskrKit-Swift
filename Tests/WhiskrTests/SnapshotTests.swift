@@ -127,7 +127,6 @@ struct SnapshotTests {
                     id: "q1",
                     title: "Ticket purchase",
                     description: "How well did buying your ticket go?",
-                    opensStoreReview: false,
                     isRequired: false,
                     A11yLabel: nil,
                     A11yHint: nil

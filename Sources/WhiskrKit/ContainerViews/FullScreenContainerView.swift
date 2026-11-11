@@ -129,8 +129,7 @@ struct FullScreenContainerView: View {
             Task {
                 await WhiskrKit.shared.submitSurveyResponse(
                     surveyId: template.id,
-                    response: surveyResponse,
-                    storeReviewQuestionIds: template.storeReviewQuestionIds
+                    response: surveyResponse
                 )
             }
             dismiss()
