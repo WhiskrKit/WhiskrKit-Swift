@@ -59,8 +59,7 @@ struct ScaleRatingView: View {
                     withAnimation(.linear.speed(2.0)) {
                         submissionAlert.showAlert[template.id] = newValue == nil
                     }
-                    guard let newValue else { return }
-                    surveyResponse.results[template.id] = .npsRating(newValue)
+                    surveyResponse.setScaleRating(newValue, for: template.id)
                 }
                 if submissionAlert.showAlert[template.id] == true, selectedScore == nil {
                     formRequiredMessage

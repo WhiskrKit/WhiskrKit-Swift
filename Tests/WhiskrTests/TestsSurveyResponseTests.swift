@@ -165,4 +165,22 @@ struct SurveyResponseTests {
         #expect(type1 == type2)
         #expect(type1 != type3)
     }
+
+    // MARK: - Scale rating
+
+    @Test("Selecting a score stores it")
+    func scaleRatingSelectStores() {
+        var response = SurveyResponse(results: [:])
+        response.setScaleRating(8, for: "q1")
+        #expect(response.results["q1"] == .npsRating(8))
+    }
+
+    @Test("Deselecting a score removes the answer")
+    func scaleRatingDeselectRemoves() {
+        var response = SurveyResponse(results: ["q2": .textualSurvey("Keep me")])
+        response.setScaleRating(8, for: "q1")
+        response.setScaleRating(nil, for: "q1")
+        #expect(response.results["q1"] == nil)
+        #expect(response.results["q2"] == .textualSurvey("Keep me"))
+    }
 }

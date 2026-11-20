@@ -26,6 +26,12 @@ struct SurveyResponse: Codable, Equatable {
         }
     }
 
+    /// Stores the score for a scale rating question, or removes the answer when
+    /// `score` is `nil` (the user tapped the selected score again).
+    mutating func setScaleRating(_ score: Int?, for questionId: String) {
+        results[questionId] = score.map { .npsRating($0) }
+    }
+
     enum SurveyType: Codable, Equatable {
         case npsRating(Int)
         case symbolRating(Int)
