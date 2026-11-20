@@ -102,15 +102,6 @@ enum ScaleRatingLayout {
         let longer = optionCount % rowCount
         return (0..<rowCount).map { $0 < longer ? base + 1 : base }
     }
-
-    /// The scores split into rows, see ``rowSizes(optionCount:maxPerRow:)``.
-    static func rows(for range: ClosedRange<Int>, maxPerRow: Int = maxButtonsPerRow) -> [[Int]] {
-        var remaining = Array(range)[...]
-        return rowSizes(optionCount: remaining.count, maxPerRow: maxPerRow).map { size in
-            defer { remaining = remaining.dropFirst(size) }
-            return Array(remaining.prefix(size))
-        }
-    }
 }
 
 // MARK: - Labels

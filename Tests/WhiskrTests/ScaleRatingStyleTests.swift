@@ -79,11 +79,10 @@ struct ScaleRatingStyleTests {
 
     @Test("Rows depend on the number of options, not on the upper bound")
     func rowSizes() {
-        #expect(ScaleRatingLayout.rows(for: 1...5).map(\.count) == [5])
-        #expect(ScaleRatingLayout.rows(for: 0...5).map(\.count) == [6])
-        #expect(ScaleRatingLayout.rows(for: 1...7).map(\.count) == [4, 3])
-        #expect(ScaleRatingLayout.rows(for: 0...10).map(\.count) == [6, 5])
-        #expect(ScaleRatingLayout.rows(for: 0...10) == [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])
+        #expect(ScaleRatingLayout.rowSizes(optionCount: 5) == [5])
+        #expect(ScaleRatingLayout.rowSizes(optionCount: 6) == [6])
+        #expect(ScaleRatingLayout.rowSizes(optionCount: 7) == [4, 3])
+        #expect(ScaleRatingLayout.rowSizes(optionCount: 11) == [6, 5])
     }
 
     @Test("Large text wraps to more, evenly filled rows")
