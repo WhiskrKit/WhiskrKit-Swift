@@ -68,9 +68,11 @@ struct ScaleRatingView: View {
     // MARK: - Numbers
 
     private var buttonGrid: some View {
-        ScaleButtonGrid {
+        // Resolved once for all buttons, not once per button.
+        let endsDescription = ScaleRatingLabels.endsDescription(for: template, locale: locale)
+        return ScaleButtonGrid {
             ForEach(template.ratingRange.asClosedRange, id: \.self) { score in
-                scoreButton(for: score)
+                scoreButton(for: score, endsDescription: endsDescription)
             }
         }
         .accessibilityElement(children: .contain)
@@ -79,7 +81,7 @@ struct ScaleRatingView: View {
     }
 
     @ViewBuilder
-    private func scoreButton(for score: Int) -> some View {
+    private func scoreButton(for score: Int, endsDescription: String?) -> some View {
         let isSelected = selectedScore == score
         Button(action: {
             withAnimation {
@@ -118,7 +120,12 @@ struct ScaleRatingView: View {
             ? .accessibilityLabelSelected
             : .accessibilityLabelNotSelected
         )
-        .accessibilityHint(Text(verbatim: ScaleRatingLabels.buttonHint(for: score, template: template, locale: locale)))
+        .accessibilityHint(Text(verbatim: ScaleRatingLabels.buttonHint(
+            for: score,
+            template: template,
+            endsDescription: endsDescription,
+            locale: locale
+        )))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 

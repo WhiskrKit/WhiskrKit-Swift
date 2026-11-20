@@ -137,9 +137,25 @@ enum ScaleRatingLabels {
     /// The VoiceOver hint of one score button: "8 out of 10", followed by what the
     /// end labels mean when there are any.
     static func buttonHint(for score: Int, template: ScaleRatingTemplate, locale: Locale) -> String {
+        buttonHint(
+            for: score,
+            template: template,
+            endsDescription: endsDescription(for: template, locale: locale),
+            locale: locale
+        )
+    }
+
+    /// ``buttonHint(for:template:locale:)`` with the ``endsDescription(for:locale:)``
+    /// already resolved, so a grid of buttons resolves the end labels only once.
+    static func buttonHint(
+        for score: Int,
+        template: ScaleRatingTemplate,
+        endsDescription: String?,
+        locale: Locale
+    ) -> String {
         let position = LocalizedStringResource.accessibilityXOutOfYLabel(score, template.ratingRange.max).resolved(in: locale)
-        guard let ends = endsDescription(for: template, locale: locale) else { return position }
-        return "\(position). \(ends)"
+        guard let endsDescription else { return position }
+        return "\(position). \(endsDescription)"
     }
 
     private static func nonEmpty(_ label: String?) -> String? {

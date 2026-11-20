@@ -168,6 +168,18 @@ struct ScaleRatingStyleTests {
         #expect(ScaleRatingLabels.buttonHint(for: 3, template: template(.custom, range: .init(min: 1, max: 5)), locale: english) == "3 out of 5")
     }
 
+    @Test("A hint built from a resolved ends description matches the one-call form")
+    func accessibilityHintWithResolvedEnds() {
+        let nps = template(.nps)
+        let ends = ScaleRatingLabels.endsDescription(for: nps, locale: english)
+        for score in 0...10 {
+            #expect(
+                ScaleRatingLabels.buttonHint(for: score, template: nps, endsDescription: ends, locale: english)
+                == ScaleRatingLabels.buttonHint(for: score, template: nps, locale: english)
+            )
+        }
+    }
+
     // MARK: - Stars
 
     @Test("VoiceOver swipes never answer by accident and clear only where tapping does")
