@@ -625,6 +625,14 @@ struct SnapshotTests {
         snap(toastView(starsToast), height: 420, background: .systemGroupedBackground)
     }
 
+    @Test("Toast — own title and description styles")
+    func toast_ownTextStyles() {
+        var theme = WhiskrKitTheme.systemStyle
+        theme.container?.toast?.title = .init(font: .footnote.weight(.semibold), color: .orange)
+        theme.container?.toast?.description = .init(font: .caption, color: .primary)
+        snap(toastView(starsToast), height: 420, background: .systemGroupedBackground, theme: theme)
+    }
+
     // MARK: - "Powered by WhiskrKit" badge
 
     private func brandedSheet(_ branding: Bool) -> SheetTemplate {

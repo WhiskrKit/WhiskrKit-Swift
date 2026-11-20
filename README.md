@@ -63,7 +63,8 @@ To set a theme, you supply:
     <ul>
       <li>Sheets</li>
       <li>Fullscreen modal views</li>
-      <li>Toasts</li>
+      <li>Toasts, optionally with their own title and description text themes
+        (otherwise they use the headline and subheadline)</li>
     </ul>
   </li>
   <li>A button theme

@@ -113,11 +113,11 @@ struct ToastView: View {
         VStack(alignment: .leading, spacing: 4) {
             if let title = template.title {
                 Text(title)
-                    .headline()
+                    .toastTitle()
             }
             if let description = template.description {
                 Text(description)
-                    .subheadline()
+                    .toastDescription()
             }
         }
     }

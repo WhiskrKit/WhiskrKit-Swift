@@ -34,6 +34,9 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
   sends, so the server can handle compatibility.
 - The Playground has a "Rating metrics" section with an NPS, CSAT, CSAT stars,
   CES and custom rating survey.
+- Toasts can style their own title and description: set `title` and
+  `description` on `container.toast` in the theme. Without them, toasts look as
+  before (the `headline` and `subheadline`, the same as the question title).
 
 ### Changed
 - Scale questions without a metric show the neutral blue for the selected score
