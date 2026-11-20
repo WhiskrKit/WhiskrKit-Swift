@@ -54,7 +54,7 @@ struct ScaleRatingView: View {
                 }
                 .onChange(of: selectedScore) { _, newValue in
                     withAnimation(.linear.speed(2.0)) {
-                        submissionAlert.showAlert[template.id] = newValue == nil
+                        submissionAlert.showAlert[template.id] = template.isRequired && newValue == nil
                     }
                     surveyResponse.setScaleRating(newValue, for: template.id)
                 }

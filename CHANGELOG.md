@@ -52,6 +52,8 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 - The `User-Agent` reported the host app's version instead of the SDK's, because
   a Swift package has no bundle of its own to read it from. The version is now a
   constant in the SDK.
+- Deselecting the score of an optional scale question showed the "required"
+  message. It now only shows for required questions.
 
 ## 0.2.0 - 2026-11-11
 
