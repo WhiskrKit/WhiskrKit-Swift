@@ -598,6 +598,33 @@ struct SnapshotTests {
         )
     }
 
+    /// A toast with a question title, the case where the two titles look alike.
+    private var starsToast: ToastTemplate {
+        ToastTemplate(
+            id: "t1",
+            title: "Quick feedback",
+            description: "We'd love to hear from you",
+            followUpIdentifier: nil,
+            survey: SurveyPresentation(
+                surveyBase: .symbolRating(
+                    base: SymbolRatingTemplate(
+                        id: "q1",
+                        title: "Rate your experience",
+                        description: "Tap the stars to rate",
+                        isRequired: true,
+                        A11yLabel: nil,
+                        A11yHint: nil
+                    )
+                )
+            )
+        )
+    }
+
+    @Test("Toast — stars question, default text styles")
+    func toast_starsQuestion() {
+        snap(toastView(starsToast), height: 420, background: .systemGroupedBackground)
+    }
+
     // MARK: - "Powered by WhiskrKit" badge
 
     private func brandedSheet(_ branding: Bool) -> SheetTemplate {

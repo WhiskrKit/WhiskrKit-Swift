@@ -56,6 +56,10 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
   message. It now only shows for required questions.
 - Swiping down with VoiceOver on a star rating that had no answer yet selected
   one star. It now leaves the question unanswered.
+- When a toast with a question title appeared, that title first sat on top of
+  the toast's own title and slid into place while the toast slid in. The
+  toast's content is now in place from the first frame. A leftover debug print
+  in the toast's drag gesture is removed too.
 
 ## 0.2.0 - 2026-11-11
 

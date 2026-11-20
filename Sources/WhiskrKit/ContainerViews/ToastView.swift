@@ -67,6 +67,10 @@ struct ToastView: View {
         }
         .frame(maxWidth: .infinity)
         .fixedSize(horizontal: false, vertical: true)
+        // Lays the content out as one unit. Without it, each text resolved its own
+        // position, and the entrance spring below animated those from a first,
+        // unsettled layout: the question title slid down from under the toast title.
+        .geometryGroup()
         .padding()
         .toastStyle()
         .padding()
@@ -84,7 +88,6 @@ struct ToastView: View {
         .gesture(
             DragGesture()
                 .onChanged { gesture in
-                    print(gesture.translation.height)
                     if gesture.translation.height > 0 {
                         offSetY = gesture.translation.height
                     }
