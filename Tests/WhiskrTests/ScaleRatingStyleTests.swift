@@ -103,6 +103,8 @@ struct ScaleRatingStyleTests {
         #expect(ScaleRatingLayout.buttonsPerRow(width: 50, buttonSize: 96) == 1)
         // Not measured yet.
         #expect(ScaleRatingLayout.buttonsPerRow(width: 0, buttonSize: 44) == 6)
+        // An unlimited width (a horizontal scroll view, `.fixedSize()`) must not trap.
+        #expect(ScaleRatingLayout.buttonsPerRow(width: .infinity, buttonSize: 44) == 6)
     }
 
     // MARK: - Labels

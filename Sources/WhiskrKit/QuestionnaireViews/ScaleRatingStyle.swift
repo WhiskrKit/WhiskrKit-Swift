@@ -83,9 +83,10 @@ enum ScaleRatingLayout {
     static let minimumButtonSize: CGFloat = 44
 
     /// How many buttons fit next to each other in `width`, capped at ``maxButtonsPerRow``.
-    /// A `width` of 0 (not measured yet) allows the maximum.
+    /// A `width` of 0 (not measured yet) or an unlimited one allows the maximum.
     static func buttonsPerRow(width: CGFloat, buttonSize: CGFloat, spacing: CGFloat = buttonSpacing) -> Int {
-        guard width > 0 else { return maxButtonsPerRow }
+        // An infinite width can't be converted to an Int, so it's handled here first.
+        guard width > 0, width.isFinite else { return maxButtonsPerRow }
         let fitting = Int(((width + spacing) / (buttonSize + spacing)).rounded(.down))
         return min(maxButtonsPerRow, max(1, fitting))
     }
