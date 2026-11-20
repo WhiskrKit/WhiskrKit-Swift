@@ -244,7 +244,7 @@ class NetworkService {
 
     // MARK: - Helper Methods
     
-    private func addCommonHeaders(to request: inout URLRequest, apiKey: String) {
+    func addCommonHeaders(to request: inout URLRequest, apiKey: String) {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue(Locale.current.identifier, forHTTPHeaderField: "Accept-Language")
         
@@ -274,9 +274,9 @@ class NetworkService {
         request.setValue(Locale.current.region?.identifier ?? "unknown", forHTTPHeaderField: "X-Region")
         request.setValue(TimeZone.current.identifier, forHTTPHeaderField: "X-Timezone")
         
-        // User agent with framework version
-        let frameworkVersion = frameworkVersion
-        request.setValue("WhiskrKit-ios/\(frameworkVersion)", forHTTPHeaderField: "User-Agent")
+        // SDK platform and version
+        request.setValue(WhiskrKitVersion.sdkHeader, forHTTPHeaderField: "X-WhiskrKit-SDK")
+        request.setValue(WhiskrKitVersion.userAgent, forHTTPHeaderField: "User-Agent")
         
         request.cachePolicy = .reloadIgnoringLocalCacheData
     }
@@ -293,10 +293,6 @@ class NetworkService {
         return identifier
     }
 
-	private var frameworkVersion: String {
-		Bundle(for: WhiskrKit.self)
-			.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
-	}
 
     private func handleStatusCode(_ statusCode: Int, isRetryable: Bool) throws {
         switch statusCode {
