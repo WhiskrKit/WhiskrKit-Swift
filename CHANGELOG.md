@@ -54,6 +54,8 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
   constant in the SDK.
 - Deselecting the score of an optional scale question showed the "required"
   message. It now only shows for required questions.
+- Swiping down with VoiceOver on a star rating that had no answer yet selected
+  one star. It now leaves the question unanswered.
 
 ## 0.2.0 - 2026-11-11
 

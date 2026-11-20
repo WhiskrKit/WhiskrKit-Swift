@@ -84,11 +84,26 @@ struct StarRatingControl: View {
         )
         .accessibilityHint(ifPresent: accessibilityHint)
         .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: rating = min(rating + 1, Self.starCount)
-            case .decrement: rating = max(rating - 1, 1)
-            @unknown default: break
-            }
+            rating = Self.adjusted(rating, direction, allowsDeselect: allowsDeselect)
+        }
+    }
+
+    /// The rating after a VoiceOver swipe up or down. Swiping down while nothing is
+    /// chosen leaves it unanswered. With `allowsDeselect`, swiping down from one star
+    /// clears the rating, as tapping the chosen star does; otherwise one star is the floor.
+    nonisolated static func adjusted(
+        _ rating: Int,
+        _ direction: AccessibilityAdjustmentDirection,
+        allowsDeselect: Bool
+    ) -> Int {
+        switch direction {
+        case .increment:
+            return min(rating + 1, starCount)
+        case .decrement:
+            guard rating > 0 else { return 0 }
+            return max(rating - 1, allowsDeselect ? 0 : 1)
+        @unknown default:
+            return rating
         }
     }
 }

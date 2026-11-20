@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Testing
 @testable import WhiskrKit
 
@@ -165,5 +166,21 @@ struct ScaleRatingStyleTests {
             == "3 out of 5. 5 is Packed"
         )
         #expect(ScaleRatingLabels.buttonHint(for: 3, template: template(.custom, range: .init(min: 1, max: 5)), locale: english) == "3 out of 5")
+    }
+
+    // MARK: - Stars
+
+    @Test("VoiceOver swipes never answer by accident and clear only where tapping does")
+    func starAdjustment() {
+        // Swiping down on an unanswered row leaves it unanswered.
+        #expect(StarRatingControl.adjusted(0, .decrement, allowsDeselect: false) == 0)
+        #expect(StarRatingControl.adjusted(0, .decrement, allowsDeselect: true) == 0)
+        // Symbol ratings keep one star as the floor; scale stars can be cleared.
+        #expect(StarRatingControl.adjusted(1, .decrement, allowsDeselect: false) == 1)
+        #expect(StarRatingControl.adjusted(1, .decrement, allowsDeselect: true) == 0)
+        #expect(StarRatingControl.adjusted(3, .decrement, allowsDeselect: true) == 2)
+        // Swiping up starts at one star and stops at five.
+        #expect(StarRatingControl.adjusted(0, .increment, allowsDeselect: true) == 1)
+        #expect(StarRatingControl.adjusted(5, .increment, allowsDeselect: false) == 5)
     }
 }
