@@ -28,7 +28,7 @@ struct SurveyResponseTests {
         let response = SurveyResponse(
             results: [
                 "q1": .symbolRating(5),
-				"q2": .npsRating(8),
+				"q2": .scaleRating(8),
 				"q3": .thumbsRating(.thumbsUp),
                 "q4": .textualSurvey("Great app!")
             ]
@@ -43,10 +43,10 @@ struct SurveyResponseTests {
             Issue.record("Expected symbolRating")
         }
         
-		if case .npsRating(let score) = response.results["q2"] {
+		if case .scaleRating(let score) = response.results["q2"] {
             #expect(score == 8)
         } else {
-            Issue.record("Expected nspRating")
+            Issue.record("Expected scaleRating")
         }
         
         if case .thumbsRating(let rating) = response.results["q3"] {
@@ -110,7 +110,7 @@ struct SurveyResponseTests {
         let original = SurveyResponse(
             results: [
                 "q1": .symbolRating(5),
-                "q2": .npsRating(9),
+                "q2": .scaleRating(9),
 				"q3": .thumbsRating(.thumbsDown),
                 "q4": .textualSurvey("Nice!")
             ]
@@ -172,7 +172,7 @@ struct SurveyResponseTests {
     func scaleRatingSelectStores() {
         var response = SurveyResponse(results: [:])
         response.setScaleRating(8, for: "q1")
-        #expect(response.results["q1"] == .npsRating(8))
+        #expect(response.results["q1"] == .scaleRating(8))
     }
 
     @Test("Deselecting a score removes the answer")
@@ -182,5 +182,20 @@ struct SurveyResponseTests {
         response.setScaleRating(nil, for: "q1")
         #expect(response.results["q1"] == nil)
         #expect(response.results["q2"] == .textualSurvey("Keep me"))
+    }
+
+    @Test("A scale rating encodes exactly as before the rename")
+    func scaleRatingWireFormatIsUnchanged() throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let data = try encoder.encode(SurveyResponse(results: ["q1": .scaleRating(8)]))
+        #expect(String(decoding: data, as: UTF8.self) == #"{"results":{"q1":{"npsRating":8}}}"#)
+    }
+
+    @Test("A stored scale rating from before the rename still decodes")
+    func storedScaleRatingDecodes() throws {
+        let data = Data(#"{"results":{"q1":{"npsRating":3}}}"#.utf8)
+        let response = try JSONDecoder().decode(SurveyResponse.self, from: data)
+        #expect(response.results["q1"] == .scaleRating(3))
     }
 }
