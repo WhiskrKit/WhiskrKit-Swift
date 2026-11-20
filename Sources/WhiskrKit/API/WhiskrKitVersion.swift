@@ -16,7 +16,7 @@ import Foundation
 /// version is written here, once. Bump it with every release; a test fails when it
 /// doesn't match the newest version in CHANGELOG.md.
 enum WhiskrKitVersion {
-    static let current = "0.2.0"
+    static let current = "0.3.0"
     static let platform = "ios"
 
     /// The `X-WhiskrKit-SDK` header value, e.g. `ios/0.3.0`. Same format on every platform.
