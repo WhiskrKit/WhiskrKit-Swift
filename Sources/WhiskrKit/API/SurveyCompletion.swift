@@ -69,7 +69,7 @@ extension SurveyCompletion {
 extension SurveyCompletion.Answer {
     init?(questionId: String, result: SurveyResponse.SurveyType) {
         switch result {
-        case .npsRating(let score):
+        case .scaleRating(let score):
             self.init(questionId: questionId, questionType: .scaleRating, value: .score(score))
         case .symbolRating(let score):
             self.init(questionId: questionId, questionType: .symbolRating, value: .score(score))

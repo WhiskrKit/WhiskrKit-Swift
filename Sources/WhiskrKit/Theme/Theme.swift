@@ -130,15 +130,25 @@ public struct WhiskrKitTheme: Sendable {
             public var cornerRadius: CGFloat
             public var backgroundColor: Color
             public var withShadow: Bool
-            
+            /// The toast's own title, above the question. `nil` uses the theme's
+            /// `headline`, the same style as the question title.
+            public var title: TextTheme?
+            /// The toast's own description. `nil` uses the theme's `subheadline`.
+            /// Shown in the secondary shade of its color, like the other subtitles.
+            public var description: TextTheme?
+
             public init(
                 cornerRadius: CGFloat = 8,
                 backgroundColor: Color = Color(.secondarySystemBackground),
-                withShadow: Bool = true
+                withShadow: Bool = true,
+                title: TextTheme? = nil,
+                description: TextTheme? = nil
             ) {
                 self.cornerRadius = cornerRadius
                 self.backgroundColor = backgroundColor
                 self.withShadow = withShadow
+                self.title = title
+                self.description = description
             }
         }
     }
@@ -296,6 +306,31 @@ struct WhiskrKitSubheadlineStyle: ViewModifier {
     }
 }
 
+/// The toast's own title: `container.toast.title`, or the headline when not set.
+struct WhiskrKitToastTitleStyle: ViewModifier {
+    @Environment(\.WhiskrKitTheme) private var WhiskrKitTheme
+
+    func body(content: Content) -> some View {
+        let style = WhiskrKitTheme.container?.toast?.title ?? WhiskrKitTheme.headline
+        content
+            .font(style.font)
+            .foregroundStyle(style.color)
+    }
+}
+
+/// The toast's own description: `container.toast.description`, or the subheadline
+/// when not set.
+struct WhiskrKitToastDescriptionStyle: ViewModifier {
+    @Environment(\.WhiskrKitTheme) private var WhiskrKitTheme
+
+    func body(content: Content) -> some View {
+        let style = WhiskrKitTheme.container?.toast?.description ?? WhiskrKitTheme.subheadline
+        content
+            .font(style.font)
+            .foregroundStyle(style.color.secondary)
+    }
+}
+
 struct WhiskrKitBodyStyle: ViewModifier {
     @Environment(\.WhiskrKitTheme) private var WhiskrKitTheme
     
@@ -325,6 +360,14 @@ extension View {
     
     func body() -> some View {
         self.modifier(WhiskrKitBodyStyle())
+    }
+
+    func toastTitle() -> some View {
+        self.modifier(WhiskrKitToastTitleStyle())
+    }
+
+    func toastDescription() -> some View {
+        self.modifier(WhiskrKitToastDescriptionStyle())
     }
     
     func sheetStyle() -> some View {

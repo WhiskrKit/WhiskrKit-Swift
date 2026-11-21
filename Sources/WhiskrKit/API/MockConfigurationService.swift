@@ -127,6 +127,47 @@ final class MockConfigurationService: ConfigurationService {
 			surveyType: .multipleChoice
 		)
 
+        // Rating metrics: one sheet per metric and display style
+        templates["nps-survey"] = createRatingSheet(
+            id: "sheet-nps",
+            title: "Quick question",
+            question: "How likely are you to recommend Stride to a friend?",
+            range: .init(min: 0, max: 10),
+            metric: .nps
+        )
+        templates["csat-survey"] = createRatingSheet(
+            id: "sheet-csat",
+            title: "Your order",
+            question: "How satisfied are you with your order?",
+            range: .init(min: 1, max: 5),
+            metric: .csat
+        )
+        templates["csat-stars-survey"] = createRatingSheet(
+            id: "sheet-csat-stars",
+            title: "Your delivery",
+            question: "How was your delivery?",
+            range: .init(min: 1, max: 5),
+            metric: .csat,
+            displayStyle: .stars
+        )
+        templates["ces-survey"] = createRatingSheet(
+            id: "sheet-ces",
+            title: "Plan changed",
+            question: "How easy was it to change your plan?",
+            range: .init(min: 1, max: 7),
+            metric: .ces
+        )
+        templates["custom-rating-survey"] = createRatingSheet(
+            id: "sheet-custom-rating",
+            title: "Workout done",
+            question: "How did the workout feel?",
+            range: .init(min: 1, max: 10),
+            metric: .custom,
+            minLabel: "Way too easy",
+            maxLabel: "Way too hard",
+            isRequired: false
+        )
+
         // Full Screen Form Templates
         templates["detailed-survey"] = createFullScreenFormTemplate(
             id: "form-1",
@@ -209,6 +250,40 @@ final class MockConfigurationService: ConfigurationService {
         return SurveyTemplate(
             presentationBase: .sheet(base: sheetTemplate)
         )
+    }
+
+    private func createRatingSheet(
+        id: String,
+        title: String,
+        question: String,
+        range: ScaleRatingTemplate.RatingRange,
+        metric: ScaleRatingTemplate.Metric,
+        displayStyle: ScaleRatingTemplate.DisplayStyle = .numbers,
+        minLabel: String? = nil,
+        maxLabel: String? = nil,
+        isRequired: Bool = true
+    ) -> SurveyTemplate {
+        let question = ScaleRatingTemplate(
+            id: "\(id)-survey",
+            title: question,
+            subtitle: nil,
+            ratingRange: range,
+            isRequired: isRequired,
+            A11yLabel: nil,
+            A11yHint: nil,
+            metric: metric,
+            displayStyle: displayStyle,
+            minLabel: minLabel,
+            maxLabel: maxLabel
+        )
+        let sheetTemplate = SheetTemplate(
+            id: id,
+            title: title,
+            description: nil,
+            followUpQuestion: nil,
+            survey: SurveyPresentation(surveyBase: .scaleRating(base: question))
+        )
+        return SurveyTemplate(presentationBase: .sheet(base: sheetTemplate))
     }
 
     private func createFullScreenFormTemplate(

@@ -53,11 +53,11 @@ iOS specifics, for reference:
 One scrollable settings-style list (iOS: `Form` in a `NavigationStack`), titled
 **"WhiskrKit Playground"**, with these sections in this order.
 
-### 3.1 "Question types" and "Presentation styles"
+### 3.1 "Question types", "Rating metrics" and "Presentation styles"
 
 One tappable row per survey descriptor (section 4), grouped by the descriptor's
 `group`. Each row shows an icon, the name and a one-line summary. Tapping a row
-presents that mocked survey immediately (section 5). Below the last of these two
+presents that mocked survey immediately (section 5). Below the last of these three
 sections, a footer reads: *"Surveys are mocked: responses and events are never sent
 to WhiskrKit."*
 
@@ -106,8 +106,19 @@ icon, `group`.
 | Question types | Thumbs rating | `checkout-survey` | sheet | Title "How was your checkout?", description "We'd love to hear your thoughts". Thumbs up/down, optional. |
 | Question types | Text feedback | `ask-survey` | sheet | Title "What would you ask us?". Free text "Tell us more", max 200 characters, required. |
 | Question types | Multiple choice | `choice-survey` | sheet | Title "You recently visited the Avatar", follow-up question "What did you like most?". Multi-select "What element is your strength?" with Water, Fire, Earth, Air; required. |
+| Rating metrics | NPS | `nps-survey` | sheet | Title "Quick question". Scale rating "How likely are you to recommend Stride to a friend?", range 0–10, metric `nps`, numbers, required. |
+| Rating metrics | CSAT | `csat-survey` | sheet | Title "Your order". Scale rating "How satisfied are you with your order?", range 1–5, metric `csat`, numbers, required. |
+| Rating metrics | CSAT stars | `csat-stars-survey` | sheet | Title "Your delivery". Scale rating "How was your delivery?", range 1–5, metric `csat`, display style `stars`, required. |
+| Rating metrics | CES | `ces-survey` | sheet | Title "Plan changed". Scale rating "How easy was it to change your plan?", range 1–7, metric `ces`, numbers, required. |
+| Rating metrics | Custom rating | `custom-rating-survey` | sheet | Title "Workout done". Scale rating "How did the workout feel?", range 1–10, metric `custom`, numbers, min label "Way too easy", max label "Way too hard", optional. |
 | Presentation styles | Toast | `welcome-toast` | toast | Title "Welcome to our app!", description "How are you liking it so far?", inline thumbs rating. Its follow-up opens `onboarding-survey`. |
 | Presentation styles | Full-screen form | `super-survey` | full-screen form | Title "Main Road Construction", subtitle "Residents satisfaction survey of Main Road Ave", with all five question types: scale, text, symbol, thumbs, multiple choice. |
+
+The rating metrics rows are all scale ratings; the SDK picks the colors, end labels
+and stars from the metric and display style, so they show what each server setting
+looks like. Their summaries: "Sheet · 0–10, red, gold and green", "Sheet · 1–5
+numbers", "Sheet · five stars", "Sheet · 1–7, how easy it was", "Sheet · 1–10 with
+the server's end labels".
 
 The question types are the five the iOS SDK supports: `scaleRating`, `symbolRating`,
 `thumbsRating`, `textualSurvey`, `multipleChoice`. The presentation styles are
@@ -341,8 +352,8 @@ Check each item in the other SDK before building its playground.
 
 ## 13. Known limitations (iOS)
 
-- Not themeable in the SDK: star color (yellow), thumbs colors, the scale rating color
-  gradient, error red, and the text field's character counter. Changing the theme
+- Not themeable in the SDK: star color (yellow), thumbs colors, the scale rating colors
+  per metric, error red, and the text field's character counter. Changing the theme
   doesn't affect them.
 - Mock content quirks, left as they are because they are visible content: the
   scale rating subtitle says "0 = Not at all likely, 8 = Extremely likely" but the range

@@ -43,7 +43,7 @@ struct SurveyCompletionTests {
         await kit.submitSurveyResponse(surveyId: "s1", response: SurveyResponse(results: [
             "s1-q10": .multipleChoice(["a", "c"]),
             "s1-q2": .symbolRating(4),
-            "s1-q1": .npsRating(9),
+            "s1-q1": .scaleRating(9),
             "s1-q3": .thumbsRating(.thumbsDown),
             "s1-q4": .textualSurvey("Great"),
         ]))
@@ -76,7 +76,7 @@ struct SurveyCompletionTests {
         kit.onSurveyCompleted = { _ in events.append("callback") }
         service.onSubmit = { events.append("network") }
 
-        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .npsRating(5)]))
+        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .scaleRating(5)]))
 
         #expect(events == ["callback", "network"])
     }
@@ -99,7 +99,7 @@ struct SurveyCompletionTests {
         var count = 0
         kit.onSurveyCompleted = { _ in count += 1 }
 
-        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .npsRating(5)]))
+        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .scaleRating(5)]))
 
         #expect(count == 0)
         #expect(service.submitCount == 0)
