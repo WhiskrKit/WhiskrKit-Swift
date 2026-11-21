@@ -13,10 +13,17 @@ concurrency:
 permissions:
   contents: read
 
+# The snapshot goldens match one exact simulator pixel for pixel, so pin the
+# Xcode and the test destination instead of taking the runner's defaults.
+# `xcode-27` is GitHub's public-preview runner image; see
+# https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+
 jobs:
   build:
     name: Build
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +45,7 @@ jobs:
 
   playground:
     name: Build Playground example
-    runs-on: macos-26
+    runs-on: xcode-27
     needs: build
 
     steps:
@@ -55,7 +62,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: macos-26
+    runs-on: xcode-27
     needs: build
 
     steps:
@@ -72,6 +79,6 @@ jobs:
         run: |
           xcodebuild test \
             -scheme WhiskrKit \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=27.0' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
