@@ -75,7 +75,7 @@ struct AttributeWireFormatTests {
 
     @Test("Values round trip with their type")
     func roundTrip() throws {
-        let original = SurveyResponse(results: ["q": .npsRating(8)], attributes: ["a": "x", "b": 4, "c": false])
+        let original = SurveyResponse(results: ["q": .scaleRating(8)], attributes: ["a": "x", "b": 4, "c": false])
         let decoded = try JSONDecoder().decode(SurveyResponse.self, from: JSONEncoder().encode(original))
         #expect(decoded.attributes?["a"] == .string("x"))
         #expect(decoded.attributes?["b"] == .number(4))
@@ -253,7 +253,7 @@ struct AttributeSubmitTests {
         let (kit, service) = make(success: false)
         service.queue = queue
         kit.setAttributes(["plan": "pro", "sessions": 3, "beta": true])
-        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .npsRating(9)]))
+        await kit.submitSurveyResponse(surveyId: "s", response: SurveyResponse(results: ["q": .scaleRating(9)]))
 
         let reloaded = UserDefaultsSubmissionStorage(userDefaults: defaults, key: "pending").load()
         #expect(reloaded.count == 1)

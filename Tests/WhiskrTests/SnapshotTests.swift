@@ -25,8 +25,9 @@ import Testing
 /// other iOS version fails on font and anti-aliasing differences alone.
 ///
 /// Note: unlike the Android views (hoisted state), the iOS question views keep
-/// selection in private `@State`, so only default and validation-error states
-/// can be snapshot here. Error states are injected through `SubmissionAlert`.
+/// selection in private `@State`, so mostly default and validation-error states
+/// are snapshot here. Error states are injected through `SubmissionAlert`;
+/// `ScaleRatingView` takes an `initialScore` so its selected colors can be checked.
 @MainActor
 @Suite("Snapshot Tests", .snapshots(record: .missing))
 struct SnapshotTests {
@@ -121,6 +122,145 @@ struct SnapshotTests {
             ),
             height: 240,
             alert: requiredAlert(for: "q1")
+        )
+    }
+
+    // MARK: Rating metrics
+
+    /// iPhone SE (2nd and 3rd generation) width, the smallest iOS 17 supports.
+    private static let smallScreenWidth: CGFloat = 375
+
+    private func metricTemplate(
+        _ metric: ScaleRatingTemplate.Metric,
+        range: ScaleRatingTemplate.RatingRange,
+        title: String,
+        displayStyle: ScaleRatingTemplate.DisplayStyle = .numbers,
+        minLabel: String? = nil,
+        maxLabel: String? = nil
+    ) -> ScaleRatingTemplate {
+        ScaleRatingTemplate(
+            id: "q1", title: title, subtitle: nil, ratingRange: range, isRequired: true,
+            A11yLabel: nil, A11yHint: nil, metric: metric, displayStyle: displayStyle,
+            minLabel: minLabel, maxLabel: maxLabel
+        )
+    }
+
+    private func npsView(score: Int?) -> some View {
+        ScaleRatingView(
+            template: metricTemplate(.nps, range: .init(min: 0, max: 10), title: "How likely are you to recommend Stride to a friend?"),
+            surveyResponse: .constant(.init(results: [:])),
+            initialScore: score
+        )
+    }
+
+    @Test("NPS 0–10 on a small screen")
+    func scaleRating_nps() {
+        snap(npsView(score: 8), width: Self.smallScreenWidth, height: 340)
+    }
+
+    @Test("NPS 0–10 on a small screen — dark")
+    func scaleRating_nps_dark() {
+        snap(npsView(score: 8), width: Self.smallScreenWidth, height: 340, dark: true)
+    }
+
+    @Test("NPS 0–10 on a small screen at an accessibility text size")
+    func scaleRating_nps_a11yType() {
+        snap(npsView(score: 6), width: Self.smallScreenWidth, height: 1150, dynamicType: .accessibility3)
+    }
+
+    @Test("NPS 0–10 on a small screen at an accessibility text size — dark")
+    func scaleRating_nps_a11yType_dark() {
+        snap(npsView(score: 6), width: Self.smallScreenWidth, height: 1150, dark: true, dynamicType: .accessibility3)
+    }
+
+    @Test("NPS 0–10 on a small screen at the largest text size")
+    func scaleRating_nps_a11yTypeLargest() {
+        snap(npsView(score: 10), width: Self.smallScreenWidth, height: 1900, dynamicType: .accessibility5)
+    }
+
+    @Test("CSAT numbers, a satisfied score")
+    func scaleRating_csat() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.csat, range: .init(min: 1, max: 5), title: "How satisfied are you with your order?"),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 4
+            ),
+            width: Self.smallScreenWidth, height: 220
+        )
+    }
+
+    @Test("CSAT stars")
+    func scaleRating_csatStars() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.csat, range: .init(min: 1, max: 5), title: "How was your delivery?", displayStyle: .stars),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 4
+            ),
+            width: Self.smallScreenWidth, height: 200
+        )
+    }
+
+    @Test("CSAT stars — dark")
+    func scaleRating_csatStars_dark() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.csat, range: .init(min: 1, max: 5), title: "How was your delivery?", displayStyle: .stars),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 4
+            ),
+            width: Self.smallScreenWidth, height: 200, dark: true
+        )
+    }
+
+    @Test("CES, neutral selection")
+    func scaleRating_ces() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.ces, range: .init(min: 1, max: 7), title: "How easy was it to change your plan?"),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 6
+            ),
+            width: Self.smallScreenWidth, height: 300
+        )
+    }
+
+    @Test("CES, neutral selection — dark")
+    func scaleRating_ces_dark() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.ces, range: .init(min: 1, max: 7), title: "How easy was it to change your plan?"),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 6
+            ),
+            width: Self.smallScreenWidth, height: 300, dark: true
+        )
+    }
+
+    @Test("Custom metric with the server's labels")
+    func scaleRating_customLabels() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(
+                    .custom, range: .init(min: 1, max: 10), title: "How did the workout feel?",
+                    minLabel: "Way too easy", maxLabel: "Way too hard"
+                ),
+                surveyResponse: .constant(.init(results: [:])),
+                initialScore: 3
+            ),
+            width: Self.smallScreenWidth, height: 300
+        )
+    }
+
+    @Test("Stars requested with a range that doesn't fit fall back to numbers")
+    func scaleRating_starsInvalidRange() {
+        snap(
+            ScaleRatingView(
+                template: metricTemplate(.custom, range: .init(min: 0, max: 5), title: "Rate the playlist", displayStyle: .stars),
+                surveyResponse: .constant(.init(results: [:]))
+            ),
+            width: Self.smallScreenWidth, height: 200
         )
     }
 
@@ -461,6 +601,41 @@ struct SnapshotTests {
             dark: true,
             background: .systemGroupedBackground
         )
+    }
+
+    /// A toast with a question title, the case where the two titles look alike.
+    private var starsToast: ToastTemplate {
+        ToastTemplate(
+            id: "t1",
+            title: "Quick feedback",
+            description: "We'd love to hear from you",
+            followUpIdentifier: nil,
+            survey: SurveyPresentation(
+                surveyBase: .symbolRating(
+                    base: SymbolRatingTemplate(
+                        id: "q1",
+                        title: "Rate your experience",
+                        description: "Tap the stars to rate",
+                        isRequired: true,
+                        A11yLabel: nil,
+                        A11yHint: nil
+                    )
+                )
+            )
+        )
+    }
+
+    @Test("Toast — stars question, default text styles")
+    func toast_starsQuestion() {
+        snap(toastView(starsToast), height: 420, background: .systemGroupedBackground)
+    }
+
+    @Test("Toast — own title and description styles")
+    func toast_ownTextStyles() {
+        var theme = WhiskrKitTheme.systemStyle
+        theme.container?.toast?.title = .init(font: .footnote.weight(.semibold), color: .orange)
+        theme.container?.toast?.description = .init(font: .caption, color: .primary)
+        snap(toastView(starsToast), height: 420, background: .systemGroupedBackground, theme: theme)
     }
 
     // MARK: - "Powered by WhiskrKit" badge

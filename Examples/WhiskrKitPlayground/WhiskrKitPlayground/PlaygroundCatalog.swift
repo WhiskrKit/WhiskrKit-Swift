@@ -17,6 +17,7 @@ import SwiftUI
 struct SurveyDescriptor: Identifiable {
 	enum Group: String, CaseIterable {
 		case questionTypes = "Question types"
+		case ratingMetrics = "Rating metrics"
 		case presentationStyles = "Presentation styles"
 	}
 
@@ -62,6 +63,41 @@ struct SurveyDescriptor: Identifiable {
 			summary: "Sheet · multi-select options",
 			systemImage: "checklist",
 			group: .questionTypes
+		),
+		SurveyDescriptor(
+			id: "nps-survey",
+			name: "NPS",
+			summary: "Sheet · 0–10, red, gold and green",
+			systemImage: "megaphone",
+			group: .ratingMetrics
+		),
+		SurveyDescriptor(
+			id: "csat-survey",
+			name: "CSAT",
+			summary: "Sheet · 1–5 numbers",
+			systemImage: "face.smiling",
+			group: .ratingMetrics
+		),
+		SurveyDescriptor(
+			id: "csat-stars-survey",
+			name: "CSAT stars",
+			summary: "Sheet · five stars",
+			systemImage: "star.leadinghalf.filled",
+			group: .ratingMetrics
+		),
+		SurveyDescriptor(
+			id: "ces-survey",
+			name: "CES",
+			summary: "Sheet · 1–7, how easy it was",
+			systemImage: "checkmark.seal",
+			group: .ratingMetrics
+		),
+		SurveyDescriptor(
+			id: "custom-rating-survey",
+			name: "Custom rating",
+			summary: "Sheet · 1–10 with the server's end labels",
+			systemImage: "slider.horizontal.3",
+			group: .ratingMetrics
 		),
 		SurveyDescriptor(
 			id: "welcome-toast",

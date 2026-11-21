@@ -26,15 +26,23 @@ struct SurveyResponse: Codable, Equatable {
         }
     }
 
+    /// Stores the score for a scale rating question, or removes the answer when
+    /// `score` is `nil` (the user tapped the selected score again).
+    mutating func setScaleRating(_ score: Int?, for questionId: String) {
+        results[questionId] = score.map { .scaleRating($0) }
+    }
+
     enum SurveyType: Codable, Equatable {
-        case npsRating(Int)
+        /// A scale rating score. Encoded under the `npsRating` key, which predates
+        /// rating metrics; the key must stay the same for servers and stored data.
+        case scaleRating(Int)
         case symbolRating(Int)
         case thumbsRating(ThumbsRating)
         case textualSurvey(String)
 		case multipleChoice([String])
 
 		enum CodingKeys: String, CodingKey {
-			case npsRating
+			case scaleRating = "npsRating"
 			case symbolRating
 			case thumbsRating
 			case textualSurvey
@@ -44,8 +52,8 @@ struct SurveyResponse: Codable, Equatable {
 		func encode(to encoder: Encoder) throws {
 			var container = encoder.container(keyedBy: CodingKeys.self)
 			switch self {
-			case .npsRating(let score):
-				try container.encode(score, forKey: .npsRating)
+			case .scaleRating(let score):
+				try container.encode(score, forKey: .scaleRating)
 			case .symbolRating(let score):
 				try container.encode(score, forKey: .symbolRating)
 			case .thumbsRating(let rating):
@@ -60,8 +68,8 @@ struct SurveyResponse: Codable, Equatable {
 		init(from decoder: Decoder) throws {
 			let container = try decoder.container(keyedBy: CodingKeys.self)
 
-			if let score = try container.decodeIfPresent(Int.self, forKey: .npsRating) {
-				self = .npsRating(score)
+			if let score = try container.decodeIfPresent(Int.self, forKey: .scaleRating) {
+				self = .scaleRating(score)
 			} else if let score = try container.decodeIfPresent(Int.self, forKey: .symbolRating) {
 				self = .symbolRating(score)
 			} else if let rating = try container.decodeIfPresent(ThumbsRating.self, forKey: .thumbsRating) {
