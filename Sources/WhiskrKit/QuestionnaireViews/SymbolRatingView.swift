@@ -46,7 +46,7 @@ struct SymbolRatingView: View {
 /// as stars. `rating` is 0 while nothing is chosen. VoiceOver reads the row as one
 /// adjustable element: swipe up or down to change the rating.
 struct StarRatingControl: View {
-    static let starCount = 5
+    nonisolated static let starCount = 5
 
     @Binding var rating: Int
     /// Tapping the chosen star again clears the rating.
