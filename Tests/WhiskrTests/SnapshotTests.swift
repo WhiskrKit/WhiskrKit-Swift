@@ -19,6 +19,11 @@ import Testing
 /// `__Snapshots__` (and fails); the second run verifies against them. Goldens
 /// are committed. Re-record deliberately after Xcode/simulator upgrades.
 ///
+/// Goldens match one exact simulator pixel for pixel: they are recorded with
+/// Xcode 27.1 on `iPhone 17, OS=27.0`, the destination CI pins in
+/// `.github/workflows/ci.yml`. Run the tests on that destination locally; any
+/// other iOS version fails on font and anti-aliasing differences alone.
+///
 /// Note: unlike the Android views (hoisted state), the iOS question views keep
 /// selection in private `@State`, so mostly default and validation-error states
 /// are snapshot here. Error states are injected through `SubmissionAlert`;
