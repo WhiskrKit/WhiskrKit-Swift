@@ -31,7 +31,7 @@ private enum LocalServer {
         request.timeoutInterval = 2
 
         let semaphore = DispatchSemaphore(value: 0)
-        var reachable = false
+        nonisolated(unsafe) var reachable = false // written before signal(), read after wait()
         URLSession.shared.dataTask(with: request) { _, response, _ in
             reachable = (response as? HTTPURLResponse)?.statusCode == 200
             semaphore.signal()
