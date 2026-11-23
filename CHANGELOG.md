@@ -8,7 +8,7 @@ Add a line under **Unreleased** in each pull request. When releasing, rename
 
 ## Unreleased
 
-## 0.3.0 - 2026-11-22
+## 0.3.0 - 2026-11-23
 
 ### Added
 - Rating metrics for scale questions. The server sends a `metric` (`nps`,
